@@ -83,41 +83,45 @@ if(qmlui)
     )
 endif()
 
-# Loop through each framework and copy it to installation
-foreach(FW_NAME IN LISTS QT_FRAMEWORK_NAMES)
-    # install each framework Version file
-    install(DIRECTORY ${QT_FRAMEWORKS_DIR}/${FW_NAME}.framework
-            DESTINATION ${INSTALLROOT}/${LIBSDIR}
-            PATTERN "Headers" EXCLUDE)
-endforeach()
+# # Loop through each framework and copy it to installation
+# foreach(FW_NAME IN LISTS QT_FRAMEWORK_NAMES)
+#     # install each framework Version file
+#     get_filename_component(REAL_FRAMEWORK_DIR "${QT_FRAMEWORKS_DIR}/${FW_NAME}.framework" REALPATH)
+    
 
-# install Qt plugins
-set(QT_PLUGINS_DIR $ENV{QTDIR}/plugins)
-set(QT_QML_DIR $ENV{QTDIR}/qml)
+#     install(DIRECTORY ${REAL_FRAMEWORK_DIR}
+#             DESTINATION ${INSTALLROOT}/${LIBSDIR}
+#             PATTERN "Headers" EXCLUDE)
+# endforeach()
 
-# imageformats
-install(FILES ${QT_PLUGINS_DIR}/imageformats/libqgif.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
-install(FILES ${QT_PLUGINS_DIR}/imageformats/libqjpeg.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
-install(FILES ${QT_PLUGINS_DIR}/imageformats/libqsvg.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
-# multimedia
-if(QT_MAJOR_VERSION GREATER 5)
-    install(FILES ${QT_PLUGINS_DIR}/multimedia/libdarwinmediaplugin.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/multimedia)
-    install(FILES ${QT_PLUGINS_DIR}/multimedia/libffmpegmediaplugin.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/multimedia)
-else()
-    install(FILES ${QT_PLUGINS_DIR}/audio/libqtaudio_coreaudio.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/audio)
-    install(FILES ${QT_PLUGINS_DIR}/mediaservice/libqavfmediaplayer.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/mediaservice)
-    install(FILES ${QT_PLUGINS_DIR}/mediaservice/libqtmedia_audioengine.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/mediaservice)
-endif()
-# platforms
-install(FILES ${QT_PLUGINS_DIR}/platforms/libqcocoa.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/platforms)
-# styles
-install(FILES ${QT_PLUGINS_DIR}/styles/libqmacstyle.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/styles)
+# # install Qt plugins
+# set(QT_PLUGINS_DIR $ENV{QTDIR}/plugins)
+# set(QT_QML_DIR $ENV{QTDIR}/qml)
 
-if(qmlui)
-    install(FILES ${QT_PLUGINS_DIR}/geometryloaders/libdefaultgeometryloader.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/geometryloaders)
-    install(FILES ${QT_PLUGINS_DIR}/renderers/libopenglrenderer.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/renderers)
-    install(FILES ${QT_PLUGINS_DIR}/sceneparsers/libassimpsceneimport.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/sceneparsers)
-endif()
+# # imageformats
+# install(FILES ${QT_PLUGINS_DIR}/imageformats/libqgif.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
+# install(FILES ${QT_PLUGINS_DIR}/imageformats/libqjpeg.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
+# install(FILES ${QT_PLUGINS_DIR}/imageformats/libqsvg.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/imageformats)
+# # multimedia
+# if(QT_MAJOR_VERSION GREATER 5)
+#     install(FILES ${QT_PLUGINS_DIR}/multimedia/libdarwinmediaplugin.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/multimedia)
+#     #install(FILES ${QT_PLUGINS_DIR}/multimedia/libffmpegmediaplugin.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/multimedia)
+# else()
+#     install(FILES ${QT_PLUGINS_DIR}/audio/libqtaudio_coreaudio.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/audio)
+#     install(FILES ${QT_PLUGINS_DIR}/mediaservice/libqavfmediaplayer.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/mediaservice)
+#     install(FILES ${QT_PLUGINS_DIR}/mediaservice/libqtmedia_audioengine.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/mediaservice)
+# endif()
+# # platforms# platforms
+# get_filename_component(REAL_COCOA_PLUGIN "${QT_PLUGINS_DIR}/platforms/libqcocoa.dylib" REALPATH)
+# install(FILES ${REAL_COCOA_PLUGIN} DESTINATION ${INSTALLROOT}/${PLUGINDIR}/platforms)
+# # styles
+# install(FILES ${QT_PLUGINS_DIR}/styles/libqmacstyle.dylib DESTINATION ${INSTALLROOT}/${PLUGINDIR}/styles)
+
+# if(qmlui)
+#     install(FILES ${QT_PLUGINS_DIR}/geometryloaders/libdefaultgeometryloader.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/geometryloaders)
+#     install(FILES ${QT_PLUGINS_DIR}/renderers/libopenglrenderer.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/renderers)
+#     install(FILES ${QT_PLUGINS_DIR}/sceneparsers/libassimpsceneimport.dylib  DESTINATION ${INSTALLROOT}/${PLUGINDIR}/sceneparsers)
+# endif()
 
 # install support libraries
 set(FFTW_LIBNAME "libfftw3.3.dylib")
@@ -137,6 +141,13 @@ install(FILES ${LIBUSB1_LIBDIR}/libusb-1.0.0.dylib DESTINATION ${INSTALLROOT}/${
 install(FILES ${SNDFILE_LIBDIR}/libsndfile.1.dylib DESTINATION ${INSTALLROOT}/${LIBSDIR})
 install(FILES ${SNDFILE_LIBDIR}/libsndfile.1.0.37.dylib DESTINATION ${INSTALLROOT}/${LIBSDIR})
 
+# Cria o arquivo qt.conf na pasta de build
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" "[Paths]\nPlugins = PlugIns\n")
+
+# Instala o qt.conf dentro da pasta Resources do App
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" 
+        DESTINATION "${INSTALLROOT}/Resources")
+
 #if(qmlui)
 #    set(qmldeps_files
 #        ${QT_QML_DIR}/Qt
@@ -147,3 +158,72 @@ install(FILES ${SNDFILE_LIBDIR}/libsndfile.1.0.37.dylib DESTINATION ${INSTALLROO
 #    )
 #    install(DIRECTORY ${qmldeps_files} DESTINATION ${INSTALLROOT}/${DATADIR}/qml)
 #endif()
+
+# ==============================================================================
+# 2. AUTOMAÇÃO: EMPACOTAMENTO E ASSINATURA PÓS-INSTALAÇÃO
+# ==============================================================================
+# ==============================================================================
+# 2. AUTOMAÇÃO: EMPACOTAMENTO E ASSINATURA PÓS-INSTALAÇÃO
+# ==============================================================================
+if(APPLE)
+    # Garante o qt.conf
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" "[Paths]\nPlugins = PlugIns\n")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" DESTINATION "/Users/ericbafa/QLC+.app/Contents/Resources")
+
+    install(CODE [=[
+        message(STATUS "==================================================")
+        message(STATUS "🚀 DEPLOY: Resolvendo Qt para múltiplos binários...")
+        message(STATUS "==================================================")
+        
+        set(APP_PATH "/Users/ericbafa/QLC+.app")
+        
+        # --- O CAÇA-FANTASMAS DO PLIST ---
+        # Acha tudo que começa com Info.plist
+        file(GLOB PLIST_GARBAGE "${APP_PATH}/Contents/Info.plist*")
+        # Protege o arquivo original tirando ele da lista de exclusão
+        list(REMOVE_ITEM PLIST_GARBAGE "${APP_PATH}/Contents/Info.plist")
+        # Se sobrou lixo (como Info.plist-e ou Info.plist''), apaga!
+        if(PLIST_GARBAGE)
+            message(STATUS "🧹 Removendo lixo gerado pelo sed: ${PLIST_GARBAGE}")
+            file(REMOVE ${PLIST_GARBAGE})
+        endif()
+        
+        # 1. Encontra todos os arquivos na pasta MacOS
+        file(GLOB MACOS_BINARIES "${APP_PATH}/Contents/MacOS/*")
+        
+        # 2. Monta a lista de flags dinamicamente
+        set(EXEC_FLAGS "")
+        foreach(BIN_FILE IN LISTS MACOS_BINARIES)
+            if(NOT IS_DIRECTORY "${BIN_FILE}")
+                list(APPEND EXEC_FLAGS "-executable=${BIN_FILE}")
+            endif()
+        endforeach()
+        
+        # 3. Executa o macdeployqt 
+        execute_process(
+            COMMAND /opt/homebrew/opt/qt/bin/macdeployqt "${APP_PATH}" ${EXEC_FLAGS} -libpath=/opt/homebrew/lib
+            RESULT_VARIABLE MACDEPLOY_RESULT
+        )
+        
+        if(NOT MACDEPLOY_RESULT EQUAL 0)
+            message(FATAL_ERROR "❌ Erro fatal: macdeployqt falhou (Código: ${MACDEPLOY_RESULT})")
+        else()
+            message(STATUS "✅ macdeployqt finalizado. Iniciando limpeza e assinatura profunda...")
+            
+            # 4. Remove qualquer atributo de quarentena do macOS
+            execute_process(COMMAND xattr -cr "${APP_PATH}")
+            
+            # 5. Faz a assinatura Ad-hoc profunda forçada (--force --deep)
+            execute_process(
+                COMMAND codesign --force --deep --sign - "${APP_PATH}"
+                RESULT_VARIABLE CODESIGN_RESULT
+            )
+            
+            if(NOT CODESIGN_RESULT EQUAL 0)
+                message(FATAL_ERROR "❌ Erro no codesign manual (Código: ${CODESIGN_RESULT})")
+            else()
+                message(STATUS "✅ SUCESSO ABSOLUTO: O QLC+ e todos os seus utilitários estão prontos!")
+            endif()
+        endif()
+    ]=])
+endif()

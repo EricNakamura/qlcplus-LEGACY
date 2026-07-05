@@ -28,7 +28,7 @@ endif()
 if(NOT WIN32 AND NOT APPLE)
     add_subdirectory(spi)
 endif()
-if(UNIX AND ${LIBOLA_FOUND} AND ${LIBOLASERVER_FOUND})
+if(UNIX AND NOT APPLE AND ${LIBOLA_FOUND} AND ${LIBOLASERVER_FOUND})
     add_subdirectory(ola)
 endif()
 

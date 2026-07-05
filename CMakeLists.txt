@@ -3,10 +3,16 @@ project(qlcplus VERSION 4.14.4 LANGUAGES C CXX)
 
 option(qmlui "Build for QLC+ 5 QML UI" OFF)
 
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "Builds in-source são proibidos! Delete o cache e use a pasta build.")
+endif()
+
 # Set Release build type by default
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Prevent CMake make install strips off non-standard build paths
 # Refer to https://stackoverflow.com/questions/7970544/cmake-make-install-output-cant-find-shared-qt-libraries-under-redhat
@@ -14,9 +20,24 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 SET(INSTALL_ROOT "/" CACHE STRING "Installation root directory")
 
+set(CMAKE_AUTOUIC ON)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if(UNIX)
     if (APPLE)
         set(iokit ON)
+
+if(APPLE)
+    install(CODE "
+        message(STATUS \"==================================================\")
+        message(STATUS \"🧹 LIMPEZA: Apagando versão antiga do QLC+.app...\")
+        message(STATUS \"==================================================\")
+        file(REMOVE_RECURSE \"/Users/ericbafa/QLC+.app\")
+    ")
+endif()
     else()
         set(udev ON)
     endif()
@@ -83,6 +104,7 @@ else()
     add_subdirectory(ui)
     add_subdirectory(main)
     add_subdirectory(fixtureeditor)
+    
 endif()
 if(APPLE AND NOT qmlui)
     add_subdirectory(launcher)
