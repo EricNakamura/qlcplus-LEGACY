@@ -40,22 +40,21 @@ class Doc;
 
 #define SETTINGS_EXPANDED "addfixture/expanded"
 
-class AddFixture final : public QDialog, public Ui_AddFixture
-{
+class AddFixture final: public QDialog, public Ui_AddFixture {
     Q_OBJECT
-    Q_DISABLE_COPY(AddFixture)
+        Q_DISABLE_COPY(AddFixture)
 
-public:
-    /**
-     * Create a new dialog for fixture definition selection.
-     * If selectManufacturer and selectModel parameters are omitted, the
-     * dialog selects "Generic Dimmer".
-     *
-     * @param parent The parent object that owns the dialog
-     * @param doc QLC engine instance
-     * @param fxi Fixture to edit (optional)
-     */
-    AddFixture(QWidget* parent, const Doc* doc, const Fixture* fxi = NULL);
+    public:
+        /**
+         * Create a new dialog for fixture definition selection.
+         * If selectManufacturer and selectModel parameters are omitted, the
+         * dialog selects "Generic Dimmer".
+         *
+         * @param parent The parent object that owns the dialog
+         * @param doc QLC engine instance
+         * @param fxi Fixture to edit (optional)
+         */
+    AddFixture(QWidget *parent, const Doc *doc, const Fixture *fxi = NULL);
 
     /** Destructor */
     ~AddFixture();
@@ -63,12 +62,12 @@ public:
     /*********************************************************************
      * Value getters
      *********************************************************************/
-public:
-    /** Get the selected QLCFixtureDef */
+    public:
+        /** Get the selected QLCFixtureDef */
     QLCFixtureDef *fixtureDef() const;
 
     /** Get the selected QLCFixtureMode */
-    QLCFixtureMode* mode() const;
+    QLCFixtureMode *mode() const;
 
     /** Get the assigned friendly name */
     QString name() const;
@@ -91,10 +90,10 @@ public:
     /** Get if the entered address is valid or not */
     bool invalidAddress() const;
 
-protected:
-    const Doc* m_doc;
-    QLCFixtureDef* m_fixtureDef;
-    QLCFixtureMode* m_mode;
+    protected:
+    const Doc *m_doc;
+    QLCFixtureDef *m_fixtureDef;
+    QLCFixtureMode *m_mode;
     quint32 m_fixtureID;
 
     QString m_nameValue;
@@ -109,14 +108,14 @@ protected:
     /*********************************************************************
      * Fillers
      *********************************************************************/
-protected:
-    /** Fill all known fixture definitions to the tree view. Select the
-        given model from the given manufacturer. */
-    void fillTree(const QString& selectManufacturer,
-                  const QString& selectModel);
+    protected:
+        /** Fill all known fixture definitions to the tree view. Select the
+            given model from the given manufacturer. */
+    void fillTree(const QString &selectManufacturer,
+                  const QString &selectModel);
 
     /** Fill all modes of the current fixture to the mode combo */
-    void fillModeCombo(const QString& text = QString());
+    void fillModeCombo(const QString &text = QString());
 
     /** Find the next free address space for current fixture selection,
         amount and address gap. Sets the address to address spin. */
@@ -131,7 +130,7 @@ protected:
      * @param numChannels Number of channels in the address space
      * @return The address or QLCChannel::invalid() if not found
      */
-    static quint32 findAddress(quint32 numChannels, QList<Fixture*> const& fixtures,
+    static quint32 findAddress(quint32 numChannels, QList<Fixture *> const &fixtures,
                                quint32 maxUniverses);
 
     /**
@@ -146,7 +145,7 @@ protected:
      * @return An address or QLCChannel::invalid() if address space not available
      */
     static quint32 findAddress(quint32 universe, quint32 numChannels,
-                               QList<Fixture*> const& fixtures, quint32 currentFixture = Fixture::invalidId());
+                               QList<Fixture *> const &fixtures, quint32 currentFixture = Fixture::invalidId());
 
     /** Update the maximum amount of fixtures for the universe */
     void updateMaximumAmount();
@@ -156,14 +155,14 @@ protected:
      */
     bool checkAddressAvailability(int value, int channels);
 
-protected:
+    protected:
     int m_fxiCount;
 
     /*********************************************************************
      * Slots
      *********************************************************************/
-protected slots:
-    /** Callback for mode selection changes */
+    protected slots:
+        /** Callback for mode selection changes */
     void slotModeActivated(int modeIndex);
 
     /** Callback for universe combo activations */
@@ -179,7 +178,7 @@ protected slots:
     void slotSelectionChanged();
 
     /** Callback for tree double clicks (same as select + OK) */
-    void slotTreeDoubleClicked(QTreeWidgetItem* item);
+    void slotTreeDoubleClicked(QTreeWidgetItem *item);
 
     /** Callback for friendly name editing */
     void slotNameEdited(const QString &text);
@@ -196,10 +195,12 @@ protected slots:
     /** Callback for button to open the Address Tool */
     void slotDiptoolButtonClicked();
 
-protected:
-    void checkOverlapping();
-};
+    void slotCreateFixtureClicked();
 
-/** @} */
+    protected:
+    void checkOverlapping();
+    };
+
+    /** @} */
 
 #endif
