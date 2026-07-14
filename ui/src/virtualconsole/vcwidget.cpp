@@ -1356,7 +1356,7 @@ void VCWidget::paintEvent(QPaintEvent* e)
     }
 }
 
-void VCWidget::mousePressEvent(QMouseEvent* e)
+void VCWidget::mousePressEvent(QMouseEvent* e) // !!WARNING
 {
     Q_ASSERT(e != NULL);
 
@@ -1384,12 +1384,12 @@ void VCWidget::mousePressEvent(QMouseEvent* e)
         {
             m_resizeMode = true;
             setMouseTracking(true);
-            setCursor(QCursor(Qt::SizeFDiagCursor));
+            setCursor(Qt::SizeAllCursor);
         }
         else
         {
             m_mousePressPoint = QPoint(e->pos().x(), e->pos().y());
-            setCursor(QCursor(Qt::SizeAllCursor));
+            setCursor(Qt::SizeAllCursor); // !!Crash
         }
     }
     else if (e->button() & Qt::RightButton)
