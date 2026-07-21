@@ -1384,12 +1384,12 @@ void VCWidget::mousePressEvent(QMouseEvent* e) // !!WARNING
         {
             m_resizeMode = true;
             setMouseTracking(true);
-            setCursor(Qt::SizeAllCursor);
+            setCursor(Qt::SizeFDiagCursor);
         }
         else
         {
             m_mousePressPoint = QPoint(e->pos().x(), e->pos().y());
-            setCursor(Qt::SizeAllCursor); // !!Crash
+            setCursor(Qt::ClosedHandCursor); // !!Crash
         }
     }
     else if (e->button() & Qt::RightButton)
