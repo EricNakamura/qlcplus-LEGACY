@@ -152,7 +152,7 @@ void Scene::setValue(const SceneValue& scv, bool blind, bool checkHTP)
                 fc.setStart(scv.value);
                 fc.setTarget(scv.value);
                 fc.setCurrent(scv.value);
-                fc.setFadeTime(0);
+                fc.setFadeTime(1);
 
                 if (m_fadersMap.contains(universe))
                 {
@@ -762,6 +762,11 @@ void Scene::processValue(MasterTimer *timer, QList<Universe*> ua, uint fadeIn, c
             fc.setCurrent(blendScene->value(scv.fxi, scv.channel), chIndex);
             qDebug() << "----- BLEND from Scene" << blendScene->name()
                      << ", fixture:" << scv.fxi << ", channel:" << scv.channel << ", value:" << fc.current();
+        } else {
+            uint absAddress = (fixture->universeAddress() + scv.channel) % 512;
+            uchar currentValue = universe->preGMValue(absAddress);
+            fc.addFlag(FadeChannel::CrossFade);
+            fc.setCurrent(currentValue, chIndex);
         }
 
         fc.setStart(fc.current(chIndex), chIndex);
