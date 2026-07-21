@@ -206,6 +206,8 @@ protected slots:
     /** Slot called when the graphics view is clicked */
     void slotViewClicked();
 
+    void slotAlwaysOnTopChanged(bool state);
+
 protected:
     QToolBar* m_graphicsToolBar;
     QSplitter* m_splitter;

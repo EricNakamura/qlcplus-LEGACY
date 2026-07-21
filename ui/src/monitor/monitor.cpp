@@ -460,6 +460,10 @@ void Monitor::initDMXToolbar()
             this, SLOT(slotUniverseSelected(int)));
     m_DMXToolBar->addWidget(uniCombo);
 
+    m_DMXToolBar->addSeparator();
+
+    m_DMXToolBar->addAction(tr("Always on top"), this, SLOT(slotAlwaysOnTopChanged(bool)))->setCheckable(true);
+
     if (QLCFile::hasWindowManager() == false)
     {
         QWidget* widget = new QWidget(this);
@@ -554,6 +558,16 @@ void Monitor::initGraphicsToolbar()
                 this, SLOT(close()));
         m_graphicsToolBar->addAction(action);
     }
+}
+
+void Monitor::slotAlwaysOnTopChanged(bool state)
+{
+    if (state == true)
+        setWindowFlag(Qt::WindowStaysOnTopHint, true);
+    else
+        setWindowFlag(Qt::WindowStaysOnTopHint, false);
+
+    this->show();
 }
 
 void Monitor::slotChooseFont()
