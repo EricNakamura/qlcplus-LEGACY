@@ -110,7 +110,7 @@ public:
     void setAnimationStyle(int style);
 
     /** This is an important method called by the QML world
-     *  when a RGBScript algorithm is selected.
+     *  when a RGBLua algorithm is selected.
      *  The steps are:
      *    - QML creates an empty GridLayout. On completed, it invokes this C++ method
      *    - each parameter label is created by the C++ code

@@ -66,7 +66,7 @@ private:
     void updateColorOptions();
     void updateColors();
     void resetProperties(QLayoutItem *item);
-    void displayProperties(RGBScript *script);
+    void displayProperties(RGBLua *script);
 
     bool createPreviewItems();
 
@@ -135,7 +135,7 @@ private:
     RGBMatrix* m_matrix; // The RGBMatrix being edited
     RGBMatrixStep *m_previewHandler;
 
-    QList <RGBScript> m_scripts;
+    QList <RGBLua> m_scripts;
 
     SpeedDialWidget *m_speedDials;
 

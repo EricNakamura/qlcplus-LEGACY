@@ -22,7 +22,7 @@
 
 #include <QMap>
 
-class RGBScript;
+class RGBLua;
 class QDir;
 class Doc;
 
@@ -43,7 +43,7 @@ public:
     /**
      * Get a script instance by name
      */
-    RGBScript* script(QString name) const;
+    RGBLua* script(QString name) const;
 
     /**
      * Load RGB scripts from the given path. Ignores duplicates.

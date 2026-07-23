@@ -31,11 +31,7 @@
 #include "rgbtext.h"
 #include "doc.h"
 
-#ifdef QT_QML_LIB
-  #include "rgbscriptv4.h"
-#else
-  #include "rgbscript.h"
-#endif
+#include "rgblua.h"
 
 RGBAlgorithm::RGBAlgorithm(Doc * doc)
     : m_doc(doc)
@@ -132,9 +128,9 @@ RGBAlgorithm* RGBAlgorithm::loader(Doc * doc, QXmlStreamReader &root)
         if (audio.loadXML(root) == true)
             algo = audio.clone();
     }
-    else if (type == KXMLQLCRGBScript)
+    else if (type == "RGBLua")
     {
-        RGBScript* scr = doc->rgbScriptsCache()->script(root.readElementText());
+        RGBLua* scr = doc->rgbScriptsCache()->script(root.readElementText());
         if (scr->apiVersion() > 0 && scr->name().isEmpty() == false)
             algo = scr;
         else

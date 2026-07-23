@@ -21,11 +21,7 @@
 #include <QDir>
 
 #include "rgbscriptscache.h"
-#ifdef QT_QML_LIB
-  #include "rgbscriptv4.h"
-#else
-  #include "rgbscript.h"
-#endif
+#include "rgblua.h"
 #include "qlcconfig.h"
 #include "qlcfile.h"
 
@@ -39,49 +35,43 @@ QStringList RGBScriptsCache::names() const
     return m_scriptsMap.keys();
 }
 
-RGBScript* RGBScriptsCache::script(QString name) const
+RGBLua* RGBScriptsCache::script(QString name) const
 {
-    RGBScript *mScript = new RGBScript(m_doc);
+    RGBLua *mScript = new RGBLua(m_doc);
     QString filename = m_scriptsMap.value(name);
     if (filename.isEmpty())
-    {
         return mScript;
-    }
-    else
-    {
-        mScript->load(filename);
-        return mScript;
-    }
+    
+    mScript->load(filename);
+    return mScript;
 }
 
 bool RGBScriptsCache::load(const QDir& dir)
 {
     qDebug() << "Loading RGB scripts in " << dir.path() << "...";
-
-    if (dir.exists() == false || dir.isReadable() == false)
-        return false;
+    if (dir.exists() == false || dir.isReadable() == false) return false;
 
     foreach (QString file, dir.entryList())
     {
-        if (!file.endsWith(".js", Qt::CaseInsensitive))
-        {
-            qDebug() << "    " << file << " skipped (special file or does not end on *.js)";
+        // Alterado de .js para .lua
+        if (!file.endsWith(".lua", Qt::CaseInsensitive)) {
             continue;
         }
+        
         QFile absFile(dir.absoluteFilePath(file));
         QString absFilename = absFile.fileName();
 
         if (m_scriptsMap.value(absFilename).isEmpty())
         {
-            if (!absFile.open(QIODevice::ReadOnly | QIODevice::Text))
-                return false;
+            if (!absFile.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
             QTextStream in(&absFile);
             QString line = in.readLine();
             while (!line.isNull())
             {
                 QStringList tokens = line.split("=");
-                if (tokens.length() == 2 && tokens[0].simplified() == "algo.name")
+                // Em Lua, declaramos o nome como: name = "Ondas"
+                if (tokens.length() >= 2 && tokens[0].simplified() == "name")
                 {
                     QString algoName = tokens[1].simplified().remove('"');
                     algoName.remove(';');
@@ -93,21 +83,13 @@ bool RGBScriptsCache::load(const QDir& dir)
             }
             absFile.close();
         }
-        else
-        {
-            qDebug() << "    " << file << " already known";
-        }
     }
     return true;
 }
-
-QDir RGBScriptsCache::systemScriptsDirectory()
-{
-    return QLCFile::systemDirectory(QString(RGBSCRIPTDIR), QString(".js"));
+QDir RGBScriptsCache::systemScriptsDirectory() {
+    return QLCFile::systemDirectory(QString(RGBSCRIPTDIR), QString(".lua"));
 }
 
-QDir RGBScriptsCache::userScriptsDirectory()
-{
-    return QLCFile::userDirectory(QString(USERRGBSCRIPTDIR), QString(RGBSCRIPTDIR),
-            QStringList() << QString("*%1").arg(".js"));
+QDir RGBScriptsCache::userScriptsDirectory() {
+    return QLCFile::userDirectory(QString(USERRGBSCRIPTDIR), QString(RGBSCRIPTDIR), QStringList() << QString("*%1").arg(".lua"));
 }

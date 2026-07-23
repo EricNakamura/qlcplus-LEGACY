@@ -25,7 +25,7 @@
 
 #include "ui_vcmatrixpresetselection.h"
 
-class RGBScript;
+class RGBLua;
 class Doc;
 
 class VCMatrixPresetSelection final : public QDialog, public Ui_VCMatrixPresetSelection
@@ -50,7 +50,7 @@ protected slots:
 
 private:
     void resetProperties(QLayoutItem *item);
-    void displayProperties(RGBScript *script);
+    void displayProperties(RGBLua *script);
 
 private:
     Doc *m_doc;

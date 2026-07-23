@@ -250,7 +250,7 @@ void RGBMatrix::setAlgorithm(RGBAlgorithm *algo)
          *  then re-apply the properties currently set in this RGBMatrix */
         if (m_algorithm != NULL && m_algorithm->type() == RGBAlgorithm::Script)
         {
-            RGBScript *script = static_cast<RGBScript*> (m_algorithm);
+            RGBLua *script = static_cast<RGBLua*> (m_algorithm);
             QMapIterator<QString, QString> it(m_properties);
             while (it.hasNext())
             {
@@ -423,7 +423,7 @@ void RGBMatrix::setProperty(QString propName, QString value)
     m_properties[propName] = value;
     if (m_algorithm != NULL && m_algorithm->type() == RGBAlgorithm::Script)
     {
-        RGBScript *script = static_cast<RGBScript*> (m_algorithm);
+        RGBLua *script = static_cast<RGBLua*> (m_algorithm);
         script->setProperty(propName, value);
 
         QVector<uint> colors = script->rgbMapGetColors();
@@ -470,7 +470,7 @@ QString RGBMatrix::property(QString propName)
     /** Otherwise, let's retrieve it from the Script */
     if (m_algorithm != NULL && m_algorithm->type() == RGBAlgorithm::Script)
     {
-        RGBScript *script = static_cast<RGBScript*> (m_algorithm);
+        RGBLua *script = static_cast<RGBLua*> (m_algorithm);
         return script->property(propName);
     }
 
@@ -676,7 +676,7 @@ void RGBMatrix::preRun(MasterTimer *timer)
 
             if (m_runAlgorithm->type() == RGBAlgorithm::Script)
             {
-                RGBScript *script = static_cast<RGBScript*> (m_runAlgorithm);
+                RGBLua *script = static_cast<RGBLua*> (m_runAlgorithm);
                 QMapIterator<QString, QString> it(m_properties);
                 while (it.hasNext())
                 {

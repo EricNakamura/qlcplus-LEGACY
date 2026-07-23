@@ -39,6 +39,7 @@ set(SCRIPT_FILES
     strobe.js
     verticalfall.js
     waves.js
+    sine.js
 )
 
 # Only perform the copy if we're building for Android

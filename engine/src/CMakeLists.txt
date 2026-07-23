@@ -73,6 +73,8 @@ add_library(${module_name} SHARED
     track.cpp track.h
     universe.cpp universe.h
     video.cpp video.h
+    rgblua.h
+    rgblua.cpp
 )
 target_include_directories(${module_name} PUBLIC
     ../../plugins/interfaces
@@ -86,6 +88,22 @@ target_link_libraries(${module_name} PUBLIC
 )
 
 target_link_libraries(${module_name} PRIVATE qlcplusaudio)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LUAJIT REQUIRED luajit)
+
+if(LUAJIT_FOUND)
+    message(STATUS "LuaJIT encontrado! Incluindo na build.")
+    target_include_directories(${module_name} PUBLIC ${LUAJIT_INCLUDE_DIRS})
+    target_link_directories(${module_name} PUBLIC ${LUAJIT_LIBRARY_DIRS})
+    target_link_libraries(${module_name} PUBLIC ${LUAJIT_LIBRARIES})
+    
+    # Cria uma macro para o C++ saber que estamos usando Lua
+    target_compile_definitions(${module_name} PUBLIC HAS_LUAJIT)
+else()
+    message(FATAL_ERROR "LuaJIT não encontrado. Instale o luajit e tente novamente.")
+endif()
+# ----------------------------
 
 if(NOT ANDROID AND NOT IOS)
     target_include_directories(${module_name} PUBLIC ../../hotplugmonitor/src)
@@ -129,15 +147,10 @@ if(APPLE)
     )
 endif()
 
-if(qmlui OR (QT_VERSION_MAJOR GREATER 5))
-    target_sources(${module_name} PRIVATE rgbscriptv4.cpp rgbscriptv4.h)
+# --- 1. BLOCO DA RGB MATRIX (Forçando o motor novo / Preparando pro Lua) ---
+target_sources(${module_name} PRIVATE rgblua.cpp rgblua.h)
 
-    target_link_libraries(${module_name} PUBLIC Qt${QT_MAJOR_VERSION}::Qml)
-else()
-    target_sources(${module_name} PRIVATE rgbscript.cpp rgbscript.h)
-    target_link_libraries(${module_name} PUBLIC Qt${QT_MAJOR_VERSION}::Script)
-endif()
-
+# --- 2. BLOCO DE AUTOMAÇÃO DE SCRIPTS (Devolvendo a paz para a Interface Gráfica) ---
 if(qmlui)
     target_sources(${module_name} PRIVATE
         scriptrunner.cpp scriptrunner.h
@@ -145,6 +158,11 @@ if(qmlui)
     )
 else()
     target_sources(${module_name} PRIVATE script.cpp script.h)
+    
+    # A interface antiga ainda precisa da biblioteca Script do Qt para esse arquivo compilar
+    if(QT_VERSION_MAJOR EQUAL 5)
+        target_link_libraries(${module_name} PUBLIC Qt${QT_MAJOR_VERSION}::Script)
+    endif()
 endif()
 
 if((NOT ANDROID AND NOT IOS) AND (${FFTW3_FOUND}))

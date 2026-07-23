@@ -449,7 +449,7 @@ void RGBMatrixEditor::createScriptObjects(QQuickItem *parent)
             m_matrix->algorithm()->type() != RGBAlgorithm::Script)
         return;
 
-    RGBScript *script = static_cast<RGBScript*> (m_matrix->algorithm());
+    RGBLua *script = static_cast<RGBLua*> (m_matrix->algorithm());
     QList<RGBScriptProperty> properties = script->properties();
 
     foreach (RGBScriptProperty prop, properties)

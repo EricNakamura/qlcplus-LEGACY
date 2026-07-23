@@ -27,11 +27,7 @@
 #include "vcmatrixpresetselection.h"
 #include "ui_vcmatrixpresetselection.h"
 #include "rgbscriptscache.h"
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
- #include "rgbscript.h"
-#else
- #include "rgbscriptv4.h"
-#endif
+#include "rgblua.h"
 #include "doc.h"
 
 #define SETTINGS_GEOMETRY "vcmatrixpresetselection/geometry"
@@ -74,7 +70,7 @@ void VCMatrixPresetSelection::resetProperties(QLayoutItem *item)
     delete item->widget();
 }
 
-void VCMatrixPresetSelection::displayProperties(RGBScript *script)
+void VCMatrixPresetSelection::displayProperties(RGBLua *script)
 {
     if (script == NULL)
         return;
@@ -182,7 +178,7 @@ void VCMatrixPresetSelection::displayProperties(RGBScript *script)
 void VCMatrixPresetSelection::slotUpdatePresetProperties()
 {
     resetProperties(m_propertiesLayout->layout());
-    RGBScript* selScript = m_doc->rgbScriptsCache()->script(m_presetCombo->currentText());
+    RGBLua* selScript = m_doc->rgbScriptsCache()->script(m_presetCombo->currentText());
     displayProperties(selScript);
     delete selScript;
 }

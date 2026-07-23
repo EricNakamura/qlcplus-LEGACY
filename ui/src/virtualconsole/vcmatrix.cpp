@@ -700,7 +700,7 @@ void VCMatrix::slotUpdate()
             algorithmType = algo->type();
             if (algorithmType == RGBAlgorithm::Script)
             {
-                algorithmProperties = reinterpret_cast<RGBScript*>(algo)->propertiesAsStrings();
+                algorithmProperties = reinterpret_cast<RGBLua*>(algo)->propertiesAsStrings();
             }
             else if (algorithmType == RGBAlgorithm::Text)
             {
@@ -1242,7 +1242,7 @@ void VCMatrix::slotCustomControlClicked()
             RGBAlgorithm* algo = RGBAlgorithm::algorithm(m_doc, control->m_resource);
             if (!control->m_properties.isEmpty())
             {
-                RGBScript *script = static_cast<RGBScript*> (algo);
+                RGBLua *script = static_cast<RGBLua*> (algo);
                 QMapIterator<QString, QString> it(control->m_properties);
                 while (it.hasNext())
                 {

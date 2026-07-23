@@ -350,7 +350,7 @@ void RGBMatrixEditor::updateExtraOptions()
 
         if (m_matrix->algorithm() != NULL && m_matrix->algorithm()->type() == RGBAlgorithm::Script)
         {
-            RGBScript *script = static_cast<RGBScript*> (m_matrix->algorithm());
+            RGBLua *script = static_cast<RGBLua*> (m_matrix->algorithm());
             displayProperties(script);
         }
     }
@@ -575,7 +575,7 @@ void RGBMatrixEditor::resetProperties(QLayoutItem *item)
     delete item->widget();
 }
 
-void RGBMatrixEditor::displayProperties(RGBScript *script)
+void RGBMatrixEditor::displayProperties(RGBLua *script)
 {
     if (script == NULL)
         return;

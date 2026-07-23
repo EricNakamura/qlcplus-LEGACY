@@ -685,7 +685,7 @@ QStringList VCAnimation::scriptAlgorithms() const
 
     for (const QString &algoName : algorithms())
     {
-        RGBScript *script = m_doc->rgbScriptsCache()->script(algoName);
+        RGBLua *script = m_doc->rgbScriptsCache()->script(algoName);
         if (script == nullptr)
             continue;
 
@@ -701,7 +701,7 @@ QVariantList VCAnimation::algorithmProperties(QString algoName) const
 {
     QVariantList list;
 
-    RGBScript *script = m_doc->rgbScriptsCache()->script(algoName);
+    RGBLua *script = m_doc->rgbScriptsCache()->script(algoName);
     if (script == nullptr)
         return list;
 
