@@ -78,6 +78,8 @@ RGBMatrix::RGBMatrix(Doc *doc)
     , m_continuousPhase(0.0)
     , m_applyingStyleAttributes(false)
     , m_controlMode(RGBMatrix::ControlModeRgb)
+    , m_speedMultiplier(1.0)
+    
 {
     setName(tr("New RGB Matrix"));
     setDuration(500);
@@ -236,6 +238,17 @@ QList<quint32> RGBMatrix::components() const
 /****************************************************************************
  * Algorithm
  ****************************************************************************/
+
+double RGBMatrix::speedMultiplier() const
+{
+    return m_speedMultiplier;
+}
+
+void RGBMatrix::setSpeedMultiplier(double multiplier)
+{
+    m_speedMultiplier = multiplier;
+    emit changed(id());
+}
 
 void RGBMatrix::setAlgorithm(RGBAlgorithm *algo)
 {
@@ -551,6 +564,10 @@ bool RGBMatrix::loadXML(QXmlStreamReader &root)
         {
             setDimmerControl(root.readElementText().toInt());
         }
+        else if (root.name() == "SpeedMultiplier")
+        {
+            setSpeedMultiplier(root.readElementText().toDouble());
+        }
         else
         {
             qWarning() << Q_FUNC_INFO << "Unknown RGB matrix tag:" << root.name();
@@ -590,6 +607,10 @@ bool RGBMatrix::saveXML(QXmlStreamWriter *doc) const
     /* LEGACY - Dimmer Control */
     if (dimmerControl())
         doc->writeTextElement(KXMLQLCRGBMatrixDimmerControl, QString::number(dimmerControl()));
+
+    // Adicione antes de fechar a tag <Function>
+    if (m_speedMultiplier != 1.0)
+        doc->writeTextElement("SpeedMultiplier", QString::number(m_speedMultiplier));
 
     /* Colors */
     for (int i = 0; i < m_rgbColors.count(); i++)
@@ -724,13 +745,39 @@ void RGBMatrix::write(MasterTimer *timer, QList<Universe *> universes)
 
         if (isPaused() == false)
         {
-            // Get a new map every time elapsed is reset to zero
-            if (elapsed() < MasterTimer::tick())
-            {
-                if (tempoType() == Beats)
-                    m_stepBeatDuration = beatsToTime(duration(), timer->beatTimeDuration());
+            // O tick do QLC+ é cravado, normalmente 20ms (50Hz)
+            double tickMs = double(MasterTimer::tick());
 
-                //qDebug() << "RGBMatrix step" << m_stepHandler->currentStepIndex() << ", color:" << QString::number(m_stepHandler->stepColor().rgb(), 16);
+            if (tempoType() == Beats)
+                m_stepBeatDuration = beatsToTime(duration(), timer->beatTimeDuration());
+
+            // Pega a duração mestre (O pulso da festa/Speed Dial)
+            uint curDuration = (tempoType() == Beats) ? m_stepBeatDuration : duration();
+
+            // 1. Calcula o Delta Fase (o quanto a onda avança nestes 20ms)
+            double deltaPhase = 0.0;
+            if (curDuration > 0)
+            {
+                deltaPhase = (tickMs / double(curDuration)) * m_speedMultiplier;
+            }
+
+            // 2. Acumula a fase contínua
+            m_continuousPhase += deltaPhase;
+
+            // 3. Sistema de Loop Infinito e Reverso
+            // Mantém a fase estritamente entre 0.0 e 1.0 sem perder a precisão do resto matemático
+            while (m_continuousPhase >= 1.0) 
+                m_continuousPhase -= 1.0;
+            while (m_continuousPhase < 0.0) 
+                m_continuousPhase += 1.0;
+
+            // 4. Injeta a fase contínua no motor Lua
+            if (m_runAlgorithm != NULL)
+                m_runAlgorithm->setStepFloat(m_continuousPhase);
+
+            // 5. Renderiza e envia direto para os LEDs (ignora o antigo Chaser)
+            if (m_runAlgorithm != NULL)
+            {
                 m_runAlgorithm->rgbMap(m_group->size(), m_stepHandler->stepColor().rgb(),
                                        m_stepHandler->currentStepIndex(), m_stepHandler->m_map);
                 updateMapChannels(m_stepHandler->m_map, m_group, universes);
@@ -777,6 +824,7 @@ void RGBMatrix::write(MasterTimer *timer, QList<Universe *> universes)
             }
         }
     }
+
 }
 
 void RGBMatrix::postRun(MasterTimer *timer, QList<Universe *> universes)
@@ -825,9 +873,9 @@ void RGBMatrix::roundCheck()
 
     // Update continuous phase based on current step index (prevents cumulative rounding errors)
     // This is analogous to how EFX uses m_currentAngle for phase scaling
-    if (m_stepsCount > 0)
+    /* if (m_stepsCount > 0)
         m_continuousPhase = double(m_stepHandler->currentStepIndex()) / double(m_stepsCount);
-
+ */
     m_roundTime.restart();
 
     if (tempoType() == Beats)
@@ -856,22 +904,66 @@ QSharedPointer<GenericFader> RGBMatrix::getFader(Universe *universe)
     return fader;
 }
 
+void RGBMatrix::flash(MasterTimer *timer, bool shouldOverride, bool forceLTP)
+{
+    // Se já estiver em flash, não faz nada
+    if (flashing() == true)
+        return;
+
+    // Salva os "poderes" que vieram do botão
+    m_flashOverrides = shouldOverride;
+    m_flashForceLTP = forceLTP;
+
+    Q_ASSERT(timer != NULL);
+    
+    // Chama o método base para emitir o sinal visual e setar a flag
+    Function::flash(timer, shouldOverride, forceLTP);
+    
+    // O ELO PERDIDO: Diz ao motor C++ para começar a processar o nosso frame a 50Hz!
+    start(timer, FunctionParent::master());
+}
+
+void RGBMatrix::unFlash(MasterTimer *timer)
+{
+    if (flashing() == false)
+        return;
+
+    // Desliga no método base
+    Function::unFlash(timer);
+
+    Q_ASSERT(timer != NULL);
+    
+    // Remove do motor (para de renderizar e apaga)
+    stop(FunctionParent::master());
+}
+
 void RGBMatrix::updateFaderValues(FadeChannel &fc, uchar value, uint fadeTime)
 {
+    Q_UNUSED(fadeTime);
+
     fc.setStart(fc.current());
     fc.setTarget(value);
     fc.setElapsed(0);
     fc.setReady(false);
     // fade in/out depends on target value
-    if (value == 0)
+    /* if (value == 0)
         fc.setFadeTime(fadeOutSpeed());
-    else
-        fc.setFadeTime(fadeTime);
+    else */
+    fc.setFadeTime(MasterTimer::tick()); // fadeTime);
+
+    if (flashing())
+    {
+        fc.addFlag(FadeChannel::Flashing);
+        if (m_flashForceLTP)
+            fc.addFlag(FadeChannel::ForceLTP);
+        if (m_flashOverrides)
+            fc.addFlag(FadeChannel::Override);
+    }
 }
 
 void RGBMatrix::updateMapChannels(const RGBMap& map, const FixtureGroup *grp, QList<Universe *> universes)
 {
-    uint fadeTime = (overrideFadeInSpeed() == defaultSpeed()) ? fadeInSpeed() : overrideFadeInSpeed();
+    uint fadeTime = duration(); //(overrideFadeInSpeed() == defaultSpeed()) ? fadeInSpeed() : overrideFadeInSpeed();
 
     // Create/modify fade channels for ALL heads in the group
     QMapIterator<QLCPoint, GroupHead> it(grp->headsMap());

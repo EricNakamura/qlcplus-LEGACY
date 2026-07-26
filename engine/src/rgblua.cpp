@@ -226,6 +226,11 @@ int RGBLua::rgbMapStepCount(const QSize& size)
     return steps;
 }
 
+void RGBLua::setStepFloat(double fStep)
+{
+    m_stepFloat = fStep;
+}
+
 void RGBLua::rgbMap(const QSize& size, uint rgb, int step, RGBMap& map)
 {
     if (!m_luaState || m_rgbMapRef == LUA_NOREF) return;
@@ -244,7 +249,7 @@ void RGBLua::rgbMap(const QSize& size, uint rgb, int step, RGBMap& map)
     lua_pushinteger(m_luaState, size.width());
     lua_pushinteger(m_luaState, size.height());
     lua_pushinteger(m_luaState, rgb);
-    lua_pushinteger(m_luaState, step);
+    lua_pushnumber(m_luaState, m_stepFloat);
 
     // Chama a função (4 argumentos, 1 retorno esperado - a tabela do mapa)
     if (lua_pcall(m_luaState, 4, 1, 0) != LUA_OK) {

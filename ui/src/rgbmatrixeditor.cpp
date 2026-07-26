@@ -157,6 +157,15 @@ void RGBMatrixEditor::init()
         break;
     }
 
+    m_speedSpin->setRange(-4.0, 4.0);
+    // Cada clique nas setinhas sobe/desce 0.1
+    m_speedSpin->setSingleStep(0.1);
+    // Carrega o valor atual que veio do XML
+    m_speedSpin->setValue(m_matrix->speedMultiplier());
+
+    // Conecta o evento de mudança na interface com a nossa função
+    connect(m_speedSpin, SIGNAL(valueChanged(double)),
+            this, SLOT(slotSpeedMultiplierChanged(double)));
 
     /* Blend mode */
     m_blendModeCombo->setCurrentIndex(m_matrix->blendMode());
@@ -284,13 +293,20 @@ void RGBMatrixEditor::updateSpeedDials()
     m_speedDials = new SpeedDialWidget(this);
     m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
     m_speedDials->setWindowTitle(m_matrix->name());
+    m_speedDials->setFadeInVisible(false);
+    m_speedDials->setFadeOutVisible(false);
+
+
     m_speedDials->show();
-    m_speedDials->setFadeInSpeed(m_matrix->fadeInSpeed());
-    m_speedDials->setFadeOutSpeed(m_matrix->fadeOutSpeed());
+    m_speedDials->setFadeInSpeed(0);
+    m_speedDials->setFadeOutSpeed(0);
+
+    // Usa a duração total como velocidade contínua
     if ((int)m_matrix->duration() < 0)
         m_speedDials->setDuration(m_matrix->duration());
     else
-        m_speedDials->setDuration(m_matrix->duration() - m_matrix->fadeInSpeed());
+        m_speedDials->setDuration(m_matrix->duration());
+
     connect(m_speedDials, SIGNAL(fadeInChanged(int)), this, SLOT(slotFadeInChanged(int)));
     connect(m_speedDials, SIGNAL(fadeOutChanged(int)), this, SLOT(slotFadeOutChanged(int)));
     connect(m_speedDials, SIGNAL(holdChanged(int)), this, SLOT(slotHoldChanged(int)));
@@ -1345,7 +1361,7 @@ void RGBMatrixEditor::slotSaveToSequenceClicked()
         sequence->setBoundSceneID(grpScene->id());
         sequence->setDurationMode(Chaser::PerStep);
         sequence->setDuration(m_matrix->duration());
-
+/* 
         if (m_matrix->fadeInSpeed() != 0)
         {
             sequence->setFadeInMode(Chaser::PerStep);
@@ -1355,17 +1371,17 @@ void RGBMatrixEditor::slotSaveToSequenceClicked()
         {
             sequence->setFadeOutMode(Chaser::PerStep);
             sequence->setFadeOutSpeed(m_matrix->fadeOutSpeed());
-        }
+        } */
 
         for (int i = 0; i < totalSteps; i++)
         {
             m_matrix->previewMap(currentStep, m_previewHandler);
             ChaserStep step;
             step.fid = grpScene->id();
-            step.hold = m_matrix->duration() - m_matrix->fadeInSpeed();
+            step.hold = 0; //- m_matrix->fadeInSpeed();
             step.duration = m_matrix->duration();
-            step.fadeIn = m_matrix->fadeInSpeed();
-            step.fadeOut = m_matrix->fadeOutSpeed();
+            step.fadeIn = m_matrix->duration();; //m_matrix->fadeInSpeed();
+            step.fadeOut = 0; //m_matrix->fadeOutSpeed();
 
             for (int y = 0; y < m_previewHandler->m_map.size(); y++)
             {
@@ -1516,6 +1532,15 @@ void RGBMatrixEditor::slotPropertyEditChanged(QString text)
         QString pName = edit->property("pName").toString();
         m_matrix->setProperty(pName, text);
     }
+}
+
+void RGBMatrixEditor::slotSpeedMultiplierChanged(double value)
+{
+    // Salva o novo multiplicador na engine
+    m_matrix->setSpeedMultiplier(value);
+    
+    // Reinicia o preview da interface para você ver a mudança na hora
+    slotRestartTest();
 }
 
 FunctionParent RGBMatrixEditor::functionParent() const

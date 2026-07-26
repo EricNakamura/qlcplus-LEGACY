@@ -71,6 +71,7 @@ private:
     bool createPreviewItems();
 
 private slots:
+    void slotSpeedMultiplierChanged(double value);
     void slotPreviewTimeout();
     void slotNameEdited(const QString& text);
     void slotSpeedDialToggle(bool state);

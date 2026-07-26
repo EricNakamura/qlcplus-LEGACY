@@ -60,6 +60,7 @@ public:
     /** Serialização XML (salvar no arquivo do show) */
     bool loadXML(QXmlStreamReader& root) override;
     bool saveXML(QXmlStreamWriter* doc) const override;
+    void setStepFloat(double fStep) override;
 
 private:
     /** Inicializa e limpa a máquina virtual do Lua */
@@ -76,6 +77,7 @@ private:
     int m_rgbMapStepCountRef;
     int m_rgbMapSetColorsRef;
     int m_rgbMapGetColorsRef;
+    double m_stepFloat = 0.0;
     
     // Cache de propriedades lidas do script para evitar chamadas pesadas repetidas
     QString m_name;

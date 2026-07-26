@@ -105,6 +105,8 @@ public:
      */
     virtual int acceptColors() const = 0;
 
+    virtual void setStepFloat(double fStep) { Q_UNUSED(fStep); }
+
     /************************************************************************
      * RGB Colors
      ************************************************************************/

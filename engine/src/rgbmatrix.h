@@ -49,6 +49,7 @@ public:
     ~RGBMatrixStep() { }
 
 public:
+
     /** Set/Get the current step index */
     void setCurrentStepIndex(int index);
     int currentStepIndex() const;
@@ -86,6 +87,8 @@ private:
     QColor m_stepColor;
     /** Color delta values of the RGB components between each step */
     int m_crDelta, m_cgDelta, m_cbDelta;
+
+    
 };
 
 class RGBMatrix final : public Function
@@ -127,6 +130,13 @@ public:
      * Contents
      *********************************************************************/
 public:
+    void flash(MasterTimer *timer, bool shouldOverride, bool forceLTP) override;
+    void unFlash(MasterTimer *timer) override;
+        // Retorna o multiplicador de velocidade atual
+    double speedMultiplier() const;
+    
+    // Define o multiplicador de velocidade
+    void setSpeedMultiplier(double multiplier);
     /** @reimp */
     void setTotalDuration(quint32 msec) override;
 
@@ -142,6 +152,8 @@ public:
 private:
     // LEGACY: replaced by ControlModeDimmer
     bool m_dimmerControl;
+    bool m_flashOverrides;
+    bool m_flashForceLTP;
 
     /*********************************************************************
      * Copying
@@ -294,6 +306,7 @@ private:
      *  This prevents cumulative rounding errors when properties are changed multiple times.
      *  Analogous to EFX's m_currentAngle, but for RGBMatrix step-based animations. */
     double m_continuousPhase;
+    double m_speedMultiplier;   
 
     bool m_applyingStyleAttributes;
 
