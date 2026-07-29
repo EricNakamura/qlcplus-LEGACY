@@ -78,6 +78,7 @@ Doc::Doc(QObject* parent, int universes)
     , m_latestPaletteId(0)
     , m_latestFunctionId(0)
     , m_startupFunctionId(Function::invalidId())
+    , m_globalTransitionTime(0)
 {
     Bus::init(this);
     resetModified();
@@ -190,6 +191,7 @@ void Doc::clearContents()
     m_latestPaletteId = 0;
     m_addresses.clear();
     m_loadStatus = Cleared;
+    m_globalTransitionTime = 0;
 
     emit cleared();
 }
@@ -232,6 +234,16 @@ QString Doc::denormalizeComponentPath(const QString& filePath) const
 /*****************************************************************************
  * Engine components
  *****************************************************************************/
+
+uint Doc::globalTransitionTime() const
+{
+    return m_globalTransitionTime;
+}
+
+void Doc::setGlobalTransitionTime(uint ms)
+{
+    m_globalTransitionTime = ms;
+}
 
 QLCFixtureDefCache* Doc::fixtureDefCache() const
 {

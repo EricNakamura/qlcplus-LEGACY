@@ -71,6 +71,7 @@ class VCSliderProperties;
 #define KXMLQLCVCSliderPlayback         QStringLiteral("Playback")
 #define KXMLQLCVCSliderPlaybackFunction QStringLiteral("Function")
 #define KXMLQLCVCSliderPlaybackFlash    QStringLiteral("Flash")
+#define KXMLQLCVCSliderGlobalTransition QStringLiteral("GlobalTransition")
 
 class VCSlider final : public VCWidget, public DMXSource
 {
@@ -148,7 +149,8 @@ public:
     {
         Level,
         Playback,
-        Submaster
+        Submaster,
+        GlobalTransition
     };
 
 public:
@@ -336,6 +338,7 @@ signals:
     void monitorDMXValueChanged(int value);
 
 protected slots:
+
     /** Removes all level channels related to removed fixture */
     void slotFixtureRemoved(quint32 fxi_id);
 
@@ -644,6 +647,7 @@ public:
      *********************************************************************/
 public:
     bool loadXML(QXmlStreamReader &root) override;
+    bool loadXMLTransition(QXmlStreamReader &root);
     bool loadXMLLevel(QXmlStreamReader &level_root);
     bool loadXMLPlayback(QXmlStreamReader &pb_root);
 

@@ -48,6 +48,10 @@
 VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
     : QDialog(slider)
     , m_doc(doc)
+    , m_sliderMode(slider->sliderMode()) // Mantém o que já existia
+    , m_inputSelWidget(NULL)
+    , m_ovrResetSelWidget(NULL)
+    , m_flashInputWidget(NULL)
 {
     Q_ASSERT(doc != NULL);
     Q_ASSERT(slider != NULL);
@@ -93,6 +97,9 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
     /* Submaster page connections */
     connect(m_switchToSubmasterModeButton, SIGNAL(clicked()),
             this, SLOT(slotModeSubmasterClicked()));
+
+    connect(m_switchToGlobalTransitionModeButton, SIGNAL(clicked()),
+            this, SLOT(slotModeGlobalTransitionClicked()));
 
     /*********************************************************************
      * General page
@@ -209,6 +216,9 @@ VCSliderProperties::VCSliderProperties(VCSlider* slider, Doc* doc)
         case VCSlider::Submaster:
             slotModeSubmasterClicked();
         break;
+        case VCSlider::GlobalTransition:
+            slotModeGlobalTransitionClicked();
+        break;
     }
 }
 
@@ -231,6 +241,7 @@ void VCSliderProperties::slotModeLevelClicked()
     setLevelPageVisibility(true);
     setPlaybackPageVisibility(false);
     setSubmasterPageVisibility(false);
+    setGlobalTransitionPageVisibility(false);
 
     int cngType = m_slider->clickAndGoType();
     switch(cngType)
@@ -274,6 +285,7 @@ void VCSliderProperties::slotModePlaybackClicked()
     setLevelPageVisibility(false);
     setPlaybackPageVisibility(true);
     setSubmasterPageVisibility(false);
+    setGlobalTransitionPageVisibility(false);
 }
 
 void VCSliderProperties::slotModeSubmasterClicked()
@@ -283,13 +295,29 @@ void VCSliderProperties::slotModeSubmasterClicked()
     setLevelPageVisibility(false);
     setPlaybackPageVisibility(false);
     setSubmasterPageVisibility(true);
+    setGlobalTransitionPageVisibility(false);
+}
+
+void VCSliderProperties::slotModeGlobalTransitionClicked()
+{
+    m_sliderMode = VCSlider::GlobalTransition;
+
+    setLevelPageVisibility(false);
+    setPlaybackPageVisibility(false);
+    setSubmasterPageVisibility(false);
+    setGlobalTransitionPageVisibility(true);
 }
 
 void VCSliderProperties::slotTabChanged()
 {
-    m_inputSelWidget->stopAutoDetection();
-    m_ovrResetSelWidget->stopAutoDetection();
-    m_flashInputWidget->stopAutoDetection();
+    if (m_inputSelWidget != NULL)
+        m_inputSelWidget->stopAutoDetection();
+
+    if (m_ovrResetSelWidget != NULL)
+        m_ovrResetSelWidget->stopAutoDetection();
+
+    if (m_flashInputWidget != NULL)
+        m_flashInputWidget->stopAutoDetection();
 }
 
 void VCSliderProperties::setLevelPageVisibility(bool visible)
@@ -348,6 +376,19 @@ void VCSliderProperties::setSubmasterPageVisibility(bool visible)
     {
         m_switchToSubmasterModeButton->show();
         m_submasterSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    }
+}
+
+void VCSliderProperties::setGlobalTransitionPageVisibility(bool visible)
+{
+
+    if (visible == true)
+    {
+        m_switchToGlobalTransitionModeButton->hide();
+    }
+    else
+    {
+        m_switchToGlobalTransitionModeButton->show();
     }
 }
 
@@ -888,6 +929,11 @@ void VCSliderProperties::accept()
         {
             m_slider->setLevelValue(UCHAR_MAX);
             m_slider->setSliderValue(UCHAR_MAX);
+        }
+        if (m_slider->sliderMode() == VCSlider::GlobalTransition)
+        {
+            m_slider->setLevelValue(0);
+            m_slider->setSliderValue(0);
         }
     }
     else if (limitDiff && m_slider->sliderMode() == VCSlider::Level)

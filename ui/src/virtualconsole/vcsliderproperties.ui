@@ -39,7 +39,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="General">
       <attribute name="title">
@@ -85,7 +85,7 @@
              <string>Slider</string>
             </property>
             <property name="icon">
-             <iconset resource="../../../build/Desktop_Qt_6_9_3-Debug/fixtureeditor/.qt/rcc/qlcui.qrc">
+             <iconset>
               <normaloff>:/slider.png</normaloff>:/slider.png</iconset>
             </property>
             <property name="iconSize">
@@ -102,7 +102,7 @@
              <string>Knob</string>
             </property>
             <property name="icon">
-             <iconset resource="../../../build/Desktop_Qt_6_9_3-Debug/fixtureeditor/.qt/rcc/qlcui.qrc">
+             <iconset>
               <normaloff>:/knob.png</normaloff>:/knob.png</iconset>
             </property>
             <property name="iconSize">
@@ -211,6 +211,23 @@
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="GlobalTransition">
+      <attribute name="title">
+       <string>GlobalTransition</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayoutverticalLayou">
+       <property name="topMargin">
+        <number>11</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="m_switchToGlobalTransitionModeButton">
+         <property name="text">
+          <string>Switch to Global Transition Mode</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -490,7 +507,7 @@
              <string notr="true">...</string>
             </property>
             <property name="icon">
-             <iconset resource="../../../build/Desktop_Qt_6_9_3-Debug/fixtureeditor/.qt/rcc/qlcui.qrc">
+             <iconset>
               <normaloff>:/attach.png</normaloff>:/attach.png</iconset>
             </property>
             <property name="iconSize">
@@ -510,7 +527,7 @@
              <string notr="true">...</string>
             </property>
             <property name="icon">
-             <iconset resource="../../../build/Desktop_Qt_6_9_3-Debug/fixtureeditor/.qt/rcc/qlcui.qrc">
+             <iconset>
               <normaloff>:/detach.png</normaloff>:/detach.png</iconset>
             </property>
             <property name="iconSize">
@@ -613,9 +630,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../build/Desktop_Qt_6_9_3-Debug/fixtureeditor/.qt/rcc/qlcui.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>m_buttonBox</sender>

@@ -167,7 +167,7 @@ protected:
      * Slider Mode
      *********************************************************************/
 public:
-    enum SliderMode { Level, Adjust, Submaster, GrandMaster };
+    enum SliderMode { Level, Adjust, Submaster, GrandMaster};
     Q_ENUM(SliderMode)
 
 public:

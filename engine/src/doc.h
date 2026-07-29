@@ -120,6 +120,8 @@ signals:
      * Engine components
      *********************************************************************/
 public:
+    uint globalTransitionTime() const;
+    void setGlobalTransitionTime(uint ms);
     /** Get the fixture definition cache object */
     QLCFixtureDefCache *fixtureDefCache() const;
 
@@ -477,6 +479,7 @@ private:
 
     /** Latest assigned palette ID */
     quint32 m_latestPaletteId;
+    uint m_globalTransitionTime;
 
     /*********************************************************************
      * Functions

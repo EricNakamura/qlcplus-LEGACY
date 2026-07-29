@@ -347,7 +347,7 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
     if (mode == Doc::Operate)
     {
         enableWidgetUI(true);
-        if (m_sliderMode == Level || m_sliderMode == Playback)
+        if (m_sliderMode == Level || m_sliderMode == Playback || m_sliderMode == GlobalTransition)
         {
             m_doc->masterTimer()->registerDMXSource(this);
             if (m_sliderMode == Level)
@@ -357,7 +357,7 @@ void VCSlider::slotModeChanged(Doc::Mode mode)
     else
     {
         enableWidgetUI(false);
-        if (m_sliderMode == Level || m_sliderMode == Playback)
+        if (m_sliderMode == Level || m_sliderMode == Playback || m_sliderMode == GlobalTransition)
         {
             m_doc->masterTimer()->unregisterDMXSource(this);
             // request to delete all the active faders
@@ -461,6 +461,7 @@ QString VCSlider::sliderModeToString(SliderMode mode)
         case Level: return QString("Level"); break;
         case Playback: return QString("Playback"); break;
         case Submaster: return QString("Submaster"); break;
+        case GlobalTransition: return QString("GlobalTransition"); break;
         default: return QString("Unknown"); break;
     }
 }
@@ -471,6 +472,8 @@ VCSlider::SliderMode VCSlider::stringToSliderMode(const QString& mode)
         return Level;
     else  if (mode == QString("Playback"))
        return Playback;
+    else if (mode == QString("GlobalTransition"))
+        return GlobalTransition;
     else //if (mode == QString("Submaster"))
         return Submaster;
 }
@@ -482,7 +485,10 @@ VCSlider::SliderMode VCSlider::sliderMode() const
 
 void VCSlider::setSliderMode(SliderMode mode)
 {
-    Q_ASSERT(mode >= Level && mode <= Submaster);
+    Q_ASSERT(mode >= Level && mode <= GlobalTransition);
+
+    if (m_sliderMode == GlobalTransition && mode != GlobalTransition && m_doc != NULL)
+        m_doc->setGlobalTransitionTime(0);
 
     m_sliderMode = mode;
 
@@ -542,6 +548,23 @@ void VCSlider::setSliderMode(SliderMode mode)
             if (m_widgetMode == WSlider)
                 m_slider->setStyleSheet(submasterStyleSheet);
         }
+        if (m_doc->mode() == Doc::Operate)
+            m_doc->masterTimer()->unregisterDMXSource(this);
+    }
+    else if (mode == GlobalTransition)
+    {
+        m_monitorEnabled = false;
+        setPlaybackFunction(Function::invalidId());
+        m_cngButton->hide();
+        m_bottomLabel->show();
+
+        if (m_slider)
+        {
+            m_slider->setRange(0, UCHAR_MAX);
+            m_slider->setValue(0);
+        }
+        
+        // Este slider não afeta canais, então removemos do DMXSource
         if (m_doc->mode() == Doc::Operate)
             m_doc->masterTimer()->unregisterDMXSource(this);
     }
@@ -1394,6 +1417,14 @@ void VCSlider::setSliderValue(uchar value, bool scale, bool external)
             emitSubmasterValue();
         }
         break;
+        case GlobalTransition:
+        {
+            if (m_doc != NULL)
+            {
+                uint msTime = (value * 5000) / UCHAR_MAX;
+                m_doc->setGlobalTransitionTime(msTime);
+            }
+        }
     }
 }
 
@@ -1930,6 +1961,8 @@ bool VCSlider::saveXML(QXmlStreamWriter *doc)
         saveXMLInput(doc, inputSource(flashButtonInputSourceId));
         doc->writeEndElement();
     }
+
+
 
     /* End the <Playback> tag */
     doc->writeEndElement();

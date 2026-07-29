@@ -681,6 +681,8 @@ void Function::setOverrideFadeInSpeed(uint ms)
 
 uint Function::overrideFadeInSpeed() const
 {
+    if (m_flashing == false && doc() != NULL && doc()->globalTransitionTime() > 0)
+        return doc()->globalTransitionTime();
     return m_overrideFadeInSpeed;
 }
 
@@ -691,6 +693,8 @@ void Function::setOverrideFadeOutSpeed(uint ms)
 
 uint Function::overrideFadeOutSpeed() const
 {
+    if (m_flashing == false && doc() != NULL && doc()->globalTransitionTime() > 0)
+        return doc()->globalTransitionTime();
     return m_overrideFadeOutSpeed;
 }
 
