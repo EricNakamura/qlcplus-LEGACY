@@ -19,6 +19,8 @@
   limitations under the License.
 */
 
+// TODO: Make the global transition return when deleted
+
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QWidgetAction>
