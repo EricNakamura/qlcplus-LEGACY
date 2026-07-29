@@ -836,10 +836,9 @@ void RGBMatrix::postRun(MasterTimer *timer, QList<Universe *> universes)
      * when done */
     if (fadeout == 0)
     {
-        dismissAllFaders();
+        fadeout = MasterTimer::tick();
     }
-    else
-    {
+    
         if (tempoType() == Beats)
             fadeout = beatsToTime(fadeout, timer->beatTimeDuration());
 
@@ -848,7 +847,7 @@ void RGBMatrix::postRun(MasterTimer *timer, QList<Universe *> universes)
             if (!fader.isNull())
                 fader->setFadeOut(true, fadeout);
         }
-    }
+    
 
     m_fadersMap.clear();
 

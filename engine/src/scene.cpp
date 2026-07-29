@@ -805,10 +805,9 @@ void Scene::handleFadersEnd(MasterTimer *timer)
      * when done */
     if (fadeout == 0)
     {
-        dismissAllFaders();
+        fadeout = MasterTimer::tick();
     }
-    else
-    {
+    
         if (tempoType() == Beats)
             fadeout = beatsToTime(fadeout, timer->beatTimeDuration());
 
@@ -817,7 +816,7 @@ void Scene::handleFadersEnd(MasterTimer *timer)
             if (!fader.isNull())
                 fader->setFadeOut(true, fadeout);
         }
-    }
+    
 
     m_fadersMap.clear();
 
