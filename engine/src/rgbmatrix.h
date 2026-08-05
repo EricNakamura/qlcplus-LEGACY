@@ -293,6 +293,8 @@ public:
     static uchar rgbToGrey(uint col);
 
 private:
+    uint m_timeTotal;
+
     /** Reference to a timer counting the time in ms between steps */
     QElapsedTimer m_roundTime;
 

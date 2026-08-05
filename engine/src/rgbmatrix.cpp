@@ -79,6 +79,7 @@ RGBMatrix::RGBMatrix(Doc *doc)
     , m_applyingStyleAttributes(false)
     , m_controlMode(RGBMatrix::ControlModeRgb)
     , m_speedMultiplier(1.0)
+    , m_timeTotal(0)
     
 {
     setName(tr("New RGB Matrix"));
@@ -714,6 +715,7 @@ void RGBMatrix::preRun(MasterTimer *timer)
         }
     }
 
+    m_timeTotal = 0;
     m_roundTime.restart();
 
     Function::preRun(timer);
@@ -789,6 +791,30 @@ void RGBMatrix::write(MasterTimer *timer, QList<Universe *> universes)
     {
         // Increment the ms elapsed time
         incrementElapsed();
+
+
+
+        uint fadeIn = overrideFadeInSpeed() == defaultSpeed() ? fadeInSpeed() : overrideFadeInSpeed();
+        
+        // Converte o tempo musical se a matriz estiver rodando via BPM
+        if (tempoType() == Beats)
+            fadeIn = beatsToTime(fadeIn, timer->beatTimeDuration());
+
+        if (fadeIn > 0 && m_timeTotal <= fadeIn + MasterTimer::tick())
+        {
+            m_timeTotal += MasterTimer::tick();
+
+            qreal fadeIntensity = 1.0;
+            if (m_timeTotal < fadeIn)
+                fadeIntensity = qreal(m_timeTotal) / qreal(fadeIn);
+
+            qreal baseIntensity = getAttributeValue(Intensity);
+            foreach (QSharedPointer<GenericFader> fader, m_fadersMap)
+            {
+                if (!fader.isNull())
+                    fader->adjustIntensity(baseIntensity * fadeIntensity);
+            }
+        }
 
         /* Check if we need to change direction, stop completely or go to next step
          * The cases are:
