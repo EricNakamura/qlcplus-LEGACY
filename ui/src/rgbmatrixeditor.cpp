@@ -293,13 +293,13 @@ void RGBMatrixEditor::updateSpeedDials()
     m_speedDials = new SpeedDialWidget(this);
     m_speedDials->setAttribute(Qt::WA_DeleteOnClose);
     m_speedDials->setWindowTitle(m_matrix->name());
-    m_speedDials->setFadeInVisible(false);
-    m_speedDials->setFadeOutVisible(false);
+    m_speedDials->setFadeInVisible(true);
+    m_speedDials->setFadeOutVisible(true);
 
 
     m_speedDials->show();
-    m_speedDials->setFadeInSpeed(0);
-    m_speedDials->setFadeOutSpeed(0);
+    m_speedDials->setFadeInSpeed(m_matrix->fadeInSpeed());
+    m_speedDials->setFadeOutSpeed(m_matrix->fadeOutSpeed());
 
     // Usa a duração total como velocidade contínua
     if ((int)m_matrix->duration() < 0)
@@ -1380,8 +1380,8 @@ void RGBMatrixEditor::slotSaveToSequenceClicked()
             step.fid = grpScene->id();
             step.hold = 0; //- m_matrix->fadeInSpeed();
             step.duration = m_matrix->duration();
-            step.fadeIn = m_matrix->duration();; //m_matrix->fadeInSpeed();
-            step.fadeOut = 0; //m_matrix->fadeOutSpeed();
+            step.fadeIn = m_matrix->fadeInSpeed(); //m_matrix->fadeInSpeed();
+            step.fadeOut = m_matrix->fadeOutSpeed(); //m_matrix->fadeOutSpeed();
 
             for (int y = 0; y < m_previewHandler->m_map.size(); y++)
             {

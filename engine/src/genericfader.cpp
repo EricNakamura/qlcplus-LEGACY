@@ -374,8 +374,6 @@ void GenericFader::setFadeOut(bool enable, uint fadeTime)
 {
     m_fadeOut = enable;
 
-    if (fadeTime == 0)
-        return;
 
     QWriteLocker l(&m_channelsLock);
     QMutableHashIterator <quint32,FadeChannel> it(m_channels);
@@ -388,15 +386,16 @@ void GenericFader::setFadeOut(bool enable, uint fadeTime)
         // to target the current universe value
         // (will be handled in the write method)
         if (((fc.flags() & FadeChannel::Flashing) == 0) &&
-            ((fc.flags() & FadeChannel::Intensity) == 0))
+            ((fc.flags() & FadeChannel::Intensity) == 0))    
             fc.addFlag(FadeChannel::SetTarget);
-        fc.setTarget(0);
+        fc.setTarget(0); // ! Strange !
         fc.setElapsed(0);
         fc.setReady(false);
         fc.setFadeTime(fc.canFade() ? fadeTime : 0);
         // if flashing, remove the flag and treat
         // it like a regular fade out to target
         fc.removeFlag(FadeChannel::Flashing);
+        fc.removeFlag(FadeChannel::Override);
     }
 }
 
