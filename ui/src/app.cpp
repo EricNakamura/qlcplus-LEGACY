@@ -215,7 +215,7 @@ void App::init()
     setWindowIcon(QIcon(":/qlcplus.png"));
 
     m_tab = new QTabWidget(this);
-    m_tab->setTabPosition(QTabWidget::South);
+    m_tab->setTabPosition(QTabWidget::East);
     setCentralWidget(m_tab);
 
 #if defined(__APPLE__) || defined(Q_OS_MAC)
@@ -284,17 +284,17 @@ void App::init()
     // Create primary views.
     m_tab->setIconSize(QSize(24, 24));
     QWidget* w = new FixtureManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/fixture.png"), tr("Fixtures"));
+    m_tab->addTab(w, tr("Fixtures"));
     w = new FunctionManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/function.png"), tr("Functions"));
+    m_tab->addTab(w, tr("Functions"));
     w = new ShowManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/show.png"), tr("Shows"));
+    m_tab->addTab(w, tr("Shows"));
     w = new VirtualConsole(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/virtualconsole.png"), tr("Virtual Console"));
+    m_tab->addTab(w, tr("Virtual Console"));
     w = new SimpleDesk(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/slidermatrix.png"), tr("Simple Desk"));
+    m_tab->addTab(w, tr("Simple Desk"));
     w = new InputOutputManager(m_tab, m_doc);
-    m_tab->addTab(w, QIcon(":/input_output.png"), tr("Inputs/Outputs"));
+    m_tab->addTab(w, tr("Inputs/Outputs"));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     /* Detach the tab's widget onto a new window on doubleClick */

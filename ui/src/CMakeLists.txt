@@ -146,6 +146,9 @@ add_library(${module_name}
     virtualconsole/vcxypadproperties.cpp virtualconsole/vcxypadproperties.h virtualconsole/vcxypadproperties.ui
     virtualconsole/virtualconsole.cpp virtualconsole/virtualconsole.h
     ${QM_FILES}
+    app.ui
+
+
 )
 
 target_include_directories(${module_name} PUBLIC
