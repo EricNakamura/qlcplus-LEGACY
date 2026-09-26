@@ -29,7 +29,7 @@ add_library(${module_name}
     addfixture.cpp addfixture.h addfixture.ui
     addresstool.cpp addresstool.h addresstool.ui
     addrgbpanel.cpp addrgbpanel.h addrgbpanel.ui
-    app.cpp app.h
+    app.cpp app.h app.ui
     apputil.cpp apputil.h
     assignhotkey.cpp assignhotkey.h assignhotkey.ui
     audiobar.cpp audiobar.h
@@ -146,9 +146,6 @@ add_library(${module_name}
     virtualconsole/vcxypadproperties.cpp virtualconsole/vcxypadproperties.h virtualconsole/vcxypadproperties.ui
     virtualconsole/virtualconsole.cpp virtualconsole/virtualconsole.h
     ${QM_FILES}
-    app.ui
-
-
 )
 
 target_include_directories(${module_name} PUBLIC

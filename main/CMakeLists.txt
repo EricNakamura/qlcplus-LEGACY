@@ -1,5 +1,7 @@
 set(module_name "qlcplus")
 
+include(../ui/src/include_ui.cmake)
+
 add_executable(${module_name} WIN32
     main.cpp
 )
@@ -10,6 +12,9 @@ target_include_directories(${module_name} PRIVATE
     ../ui/src/virtualconsole
     ../webaccess/src
 )
+
+# app.h includes the AUTOUIC-generated ui_app.h from the qlcplusui module
+include_ui_header(${module_name})
 
 target_link_libraries(${module_name} PRIVATE
     Qt${QT_MAJOR_VERSION}::Core

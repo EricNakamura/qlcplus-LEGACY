@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Eric Nakamura</author>
+ <comment>
+  Q Light Controller Plus
+  mydialog.ui
+
+  Copyright (c) 2026 Eric Nakamura
+
+  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0.txt
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ </comment>
+ <class>MyDialog</class>
+ <widget class="QDialog" name="MyDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>My Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="m_mainLayout">
+   <item>
+    <widget class="QGroupBox" name="m_settingsGroup">
+     <property name="title">
+      <string>Settings</string>
+     </property>
+     <layout class="QGridLayout" name="m_settingsGrid">
+      <item row="0" column="0">
+       <widget class="QLabel" name="m_nameLabel">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="m_nameEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="m_countLabel">
+        <property name="text">
+         <string>Count</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="m_countSpin">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>512</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="m_verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="m_buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="qlcui.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>m_buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MyDialog</receiver>
+   <slot>accept()</slot>
+  </connection>
+  <connection>
+   <sender>m_buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MyDialog</receiver>
+   <slot>reject()</slot>
+  </connection>
+ </connections>
+ <tabstops>
+  <tabstop>m_nameEdit</tabstop>
+  <tabstop>m_countSpin</tabstop>
+  <tabstop>m_buttonBox</tabstop>
+ </tabstops>
+</ui>

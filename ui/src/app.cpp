@@ -100,34 +100,13 @@ typedef BOOL (WINAPI *SetProcessInformationType)(
 
 App::App()
     : QMainWindow()
-    , m_tab(NULL)
     , m_overscan(false)
     , m_noGui(false)
     , m_progressDialog(NULL)
     , m_doc(NULL)
 
-    , m_fileNewAction(NULL)
-    , m_fileOpenAction(NULL)
-    , m_fileSaveAction(NULL)
-    , m_fileSaveAsAction(NULL)
-
-    , m_modeToggleAction(NULL)
-    , m_controlMonitorAction(NULL)
-    , m_addressToolAction(NULL)
-    , m_controlFullScreenAction(NULL)
-    , m_controlBlackoutAction(NULL)
-    , m_controlPanicAction(NULL)
-    , m_dumpDmxAction(NULL)
-    , m_liveEditAction(NULL)
-    , m_liveEditVirtualConsoleAction(NULL)
-
-    , m_helpIndexAction(NULL)
-    , m_helpAboutAction(NULL)
-    , m_quitAction(NULL)
     , m_fileOpenMenu(NULL)
     , m_fadeAndStopMenu(NULL)
-
-    , m_toolbar(NULL)
 
     , m_dumpProperties(NULL)
     , m_videoProvider(NULL)
@@ -212,11 +191,9 @@ void App::init()
 {
     QSettings settings;
 
-    setWindowIcon(QIcon(":/qlcplus.png"));
+    setupUi(this);
 
-    m_tab = new QTabWidget(this);
-    m_tab->setTabPosition(QTabWidget::East);
-    setCentralWidget(m_tab);
+    setWindowIcon(QIcon(":/qlcplus.png"));
 
 #if defined(__APPLE__) || defined(Q_OS_MAC)
     m_tab->setElideMode(Qt::TextElideMode::ElideNone);
@@ -282,7 +259,6 @@ void App::init()
     m_dumpProperties = new DmxDumpFactoryProperties(KUniverseCount);
 
     // Create primary views.
-    m_tab->setIconSize(QSize(24, 24));
     QWidget* w = new FixtureManager(m_tab, m_doc);
     m_tab->addTab(w, tr("Fixtures"));
     w = new FunctionManager(m_tab, m_doc);
@@ -678,55 +654,31 @@ void App::slotModeChanged(Doc::Mode mode)
 
 void App::initActions()
 {
+    /* The actions themselves are declared in app.ui and created by setupUi().
+       Here we only wire them up and apply the dynamic state. */
+
     /* File actions */
-    m_fileNewAction = new QAction(QIcon(":/filenew.png"), tr("&New"), this);
-    m_fileNewAction->setShortcut(QKeySequence("CTRL+N"));
     connect(m_fileNewAction, SIGNAL(triggered(bool)), this, SLOT(slotFileNew()));
-
-    m_fileOpenAction = new QAction(QIcon(":/fileopen.png"), tr("&Open"), this);
-    m_fileOpenAction->setShortcut(QKeySequence("CTRL+O"));
     connect(m_fileOpenAction, SIGNAL(triggered(bool)), this, SLOT(slotFileOpen()));
-
-    m_fileSaveAction = new QAction(QIcon(":/filesave.png"), tr("&Save"), this);
-    m_fileSaveAction->setShortcut(QKeySequence("CTRL+S"));
     connect(m_fileSaveAction, SIGNAL(triggered(bool)), this, SLOT(slotFileSave()));
-
-    m_fileSaveAsAction = new QAction(QIcon(":/filesaveas.png"), tr("Save &As..."), this);
     connect(m_fileSaveAsAction, SIGNAL(triggered(bool)), this, SLOT(slotFileSaveAs()));
 
     /* Control actions */
-    m_modeToggleAction = new QAction(QIcon(":/operate.png"), tr("&Operate"), this);
-    m_modeToggleAction->setToolTip(tr("Switch to operate mode"));
-    m_modeToggleAction->setShortcut(QKeySequence("CTRL+F12"));
     connect(m_modeToggleAction, SIGNAL(triggered(bool)), this, SLOT(slotModeToggle()));
-
-    m_controlMonitorAction = new QAction(QIcon(":/monitor.png"), tr("&Monitor"), this);
-    m_controlMonitorAction->setShortcut(QKeySequence("CTRL+M"));
     connect(m_controlMonitorAction, SIGNAL(triggered(bool)), this, SLOT(slotControlMonitor()));
-
-    m_addressToolAction = new QAction(QIcon(":/diptool.png"), tr("Address Tool"), this);
     connect(m_addressToolAction, SIGNAL(triggered()), this, SLOT(slotAddressTool()));
 
-    m_controlBlackoutAction = new QAction(QIcon(":/blackout.png"), tr("Toggle &Blackout"), this);
-    m_controlBlackoutAction->setCheckable(true);
     connect(m_controlBlackoutAction, SIGNAL(triggered(bool)), this, SLOT(slotControlBlackout()));
     m_controlBlackoutAction->setChecked(m_doc->inputOutputMap()->blackout());
 
-    m_liveEditAction = new QAction(QIcon(":/liveedit.png"), tr("Live edit a function"), this);
     connect(m_liveEditAction, SIGNAL(triggered()), this, SLOT(slotFunctionLiveEdit()));
     m_liveEditAction->setEnabled(false);
 
-    m_liveEditVirtualConsoleAction = new QAction(QIcon(":/liveedit_vc.png"), tr("Toggle Virtual Console Live edit"), this);
     connect(m_liveEditVirtualConsoleAction, SIGNAL(triggered()), this, SLOT(slotLiveEditVirtualConsole()));
-    m_liveEditVirtualConsoleAction->setCheckable(true);
     m_liveEditVirtualConsoleAction->setEnabled(false);
 
-    m_dumpDmxAction = new QAction(QIcon(":/add_dump.png"), tr("Dump DMX values to a function"), this);
-    m_dumpDmxAction->setShortcut(QKeySequence("CTRL+D"));
     connect(m_dumpDmxAction, SIGNAL(triggered()), this, SLOT(slotDumpDmxIntoFunction()));
 
-    m_controlPanicAction = new QAction(QIcon(":/panic.png"), tr("Stop ALL functions!"), this);
-    m_controlPanicAction->setShortcut(QKeySequence("CTRL+SHIFT+ESC"));
     connect(m_controlPanicAction, SIGNAL(triggered(bool)), this, SLOT(slotControlPanic()));
 
     m_fadeAndStopMenu = new QMenu();
@@ -752,62 +704,33 @@ void App::initActions()
 
     m_controlPanicAction->setMenu(m_fadeAndStopMenu);
 
-    m_controlFullScreenAction = new QAction(QIcon(":/fullscreen.png"), tr("Toggle Full Screen"), this);
-    m_controlFullScreenAction->setCheckable(true);
-    m_controlFullScreenAction->setShortcut(QKeySequence("CTRL+F11"));
     connect(m_controlFullScreenAction, SIGNAL(triggered(bool)), this, SLOT(slotControlFullScreen()));
 
     /* Help actions */
-    m_helpIndexAction = new QAction(QIcon(":/help.png"), tr("&Index"), this);
-    m_helpIndexAction->setShortcut(QKeySequence("SHIFT+F1"));
     connect(m_helpIndexAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpIndex()));
-
-    m_helpAboutAction = new QAction(QIcon(":/qlcplus.png"), tr("&About QLC+"), this);
     connect(m_helpAboutAction, SIGNAL(triggered(bool)), this, SLOT(slotHelpAbout()));
 
-    if (QLCFile::hasWindowManager() == false)
+    /* The quit action is only meaningful when there is no window manager */
+    if (QLCFile::hasWindowManager() == true)
     {
-        m_quitAction = new QAction(QIcon(":/exit.png"), tr("Quit QLC+"), this);
-        m_quitAction->setShortcut(QKeySequence("CTRL+ALT+Backspace"));
+        m_toolbar->removeAction(m_quitAction);
+        m_quitAction->setShortcut(QKeySequence());
+    }
+    else
+    {
         connect(m_quitAction, SIGNAL(triggered(bool)), this, SLOT(close()));
     }
 }
 
 void App::initToolBar()
 {
-    m_toolbar = new QToolBar(tr("Workspace"), this);
-    m_toolbar->setFloatable(false);
-    m_toolbar->setMovable(false);
-    m_toolbar->setAllowedAreas(Qt::TopToolBarArea);
-    m_toolbar->setContextMenuPolicy(Qt::CustomContextMenu);
-    addToolBar(m_toolbar);
-    m_toolbar->addAction(m_fileNewAction);
-    m_toolbar->addAction(m_fileOpenAction);
-    m_toolbar->addAction(m_fileSaveAction);
-    m_toolbar->addAction(m_fileSaveAsAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_controlMonitorAction);
-    m_toolbar->addAction(m_addressToolAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_controlFullScreenAction);
-    m_toolbar->addAction(m_helpIndexAction);
-    m_toolbar->addAction(m_helpAboutAction);
-    if (QLCFile::hasWindowManager() == false)
-        m_toolbar->addAction(m_quitAction);
+    /* The toolbar and its actions are declared in app.ui and created by
+       setupUi(). Here we only apply the dynamic tweaks. */
 
     /* Create an empty widget between help items to flush them to the right */
     QWidget* widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    m_toolbar->addWidget(widget);
-    m_toolbar->addAction(m_dumpDmxAction);
-    m_toolbar->addAction(m_liveEditAction);
-    m_toolbar->addAction(m_liveEditVirtualConsoleAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_controlPanicAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_controlBlackoutAction);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_modeToggleAction);
+    m_toolbar->insertWidget(m_dumpDmxAction, widget);
 
     QToolButton* btn = qobject_cast<QToolButton*> (m_toolbar->widgetForAction(m_fileOpenAction));
     Q_ASSERT(btn != NULL);

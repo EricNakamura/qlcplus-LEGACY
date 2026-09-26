@@ -30,6 +30,8 @@
 #include "qlcfixturedefcache.h"
 #include "doc.h"
 
+#include "ui_app.h"
+
 class QProgressDialog;
 class VideoProvider;
 class QMessageBox;
@@ -69,7 +71,7 @@ signals:
     void closing();
 };
 
-class App final : public QMainWindow
+class App final : public QMainWindow, public Ui_App
 {
     Q_OBJECT
     Q_DISABLE_COPY(App)
@@ -96,7 +98,6 @@ protected:
 #endif
 
 private:
-    QTabWidget* m_tab;
     QDir m_workingDirectory;
     bool m_overscan;
     bool m_noGui;
@@ -182,29 +183,8 @@ public slots:
     void slotRecentFileClicked(QAction *recent);
 
 private:
-    QAction* m_fileNewAction;
-    QAction* m_fileOpenAction;
-    QAction* m_fileSaveAction;
-    QAction* m_fileSaveAsAction;
-
-    QAction* m_modeToggleAction;
-    QAction* m_controlMonitorAction;
-    QAction* m_addressToolAction;
-    QAction* m_controlFullScreenAction;
-    QAction* m_controlBlackoutAction;
-    QAction* m_controlPanicAction;
-    QAction* m_dumpDmxAction;
-    QAction* m_liveEditAction;
-    QAction* m_liveEditVirtualConsoleAction;
-
-    QAction* m_helpIndexAction;
-    QAction* m_helpAboutAction;
-    QAction* m_quitAction;
     QMenu* m_fileOpenMenu;
     QMenu* m_fadeAndStopMenu;
-
-private:
-    QToolBar* m_toolbar;
 
     /*********************************************************************
      * Utilities
