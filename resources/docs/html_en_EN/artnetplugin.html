@@ -78,6 +78,17 @@ portability of a project across different platforms, such as different operating
 QLC+ will always appear in this list as a node participating to the network.<br>
 ArtNet nodes are added to this list if they support the ArtPoll/ArtPollReply message, otherwise they won't appear.
 This doesn't mean you will not able to communicate with them.
+<br>
+<br>
+<b>Automatic configuration</b>: when an <b>Easy ArtNet Interface</b> device
+(<a href="https://github.com/EricNakamura/easy-artnet-interface">github.com/EricNakamura/easy-artnet-interface</a>)
+is discovered, QLC+ can automatically set the output IP address to the device unicast address,
+instead of using broadcast. This only affects devices reporting the Easy ArtNet OEM code and
+never overrides an IP address set manually.<br>
+Use the <EM>Auto-configure detected Easy ArtNet devices</EM> checkbox to enable or disable this
+behaviour, and the <EM>Auto-configure now</EM> button to apply it immediately to all the patched
+output universes. The <EM>Refresh nodes</EM> button in the Nodes Tree tab forces a new
+ArtPoll discovery round.
 </P>
 
 <H2>DMXKing eDMX and ENTTEC ODE</H2>

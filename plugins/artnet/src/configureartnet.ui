@@ -80,6 +80,31 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="autoconfLayout">
+         <item>
+          <widget class="QCheckBox" name="m_autoconfCheck">
+           <property name="text">
+            <string>Auto-configure detected Easy ArtNet devices</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_autoconfigureButton">
+           <property name="text">
+            <string>Auto-configure now</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_autoconfStatus">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLabel" name="label_2">
@@ -140,6 +165,13 @@
            <string>Long Name</string>
           </property>
          </column>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_refreshNodesButton">
+         <property name="text">
+          <string>Refresh nodes</string>
+         </property>
         </widget>
        </item>
       </layout>

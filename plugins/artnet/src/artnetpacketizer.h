@@ -62,7 +62,18 @@
 
 #define ARTNET_CODE_STR "Art-Net"
 
-typedef struct
+/** OEM code reported by the Easy ArtNet Interface firmware
+ *  (github.com/EricNakamura/easy-artnet-interface).
+ *  This value MUST match the one sent in the ArtPollReply by the firmware,
+ *  and is used by QLC+ to positively identify the device before
+ *  auto-configuring its output IP address. */
+#define EASYARTNET_OEM       0xFFFE
+
+/** Short name reported by the Easy ArtNet Interface firmware.
+ *  Used as a fallback identification when the OEM code is not available */
+#define EASYARTNET_SHORTNAME "EasyArtNet"
+
+typedef struct _artnetnodeinfo
 {
     QString shortName;
     QString longName;
@@ -70,7 +81,19 @@ typedef struct
     bool isInput;
     bool isOutput;
     ushort universe;
-    // ... can be extended with more info to be added by fillArtPollReplyInfo
+
+    /** Art-Net OEM code reported by the node (Hi, Lo bytes) */
+    quint16 oem;
+
+    /** Bind index reported by the node */
+    quint8 bindIndex;
+
+    /** Return true if this node is an Easy ArtNet Interface device.
+     *  Used to restrict the automatic configuration to this specific device */
+    bool isEasyArtNet() const
+    {
+        return (oem == EASYARTNET_OEM) || shortName.contains(EASYARTNET_SHORTNAME);
+    }
 } ArtNetNodeInfo;
 
 class ArtNetPacketizer final

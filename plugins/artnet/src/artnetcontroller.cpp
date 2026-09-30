@@ -189,18 +189,30 @@ bool ArtNetController::setOutputIPAddress(quint32 universe, QString address)
     QMutexLocker locker(&m_dataMutex);
 
     QHostAddress hostAddress(address);
-    if (hostAddress.isNull() || !address.contains("."))
+    if (hostAddress.isNull() && address.contains("."))
     {
-        // IP addresses are now always fully saved
-        qDebug() << "[setOutputIPAddress] Legacy IP style detected:" << address;
+        // Legacy IP style (e.g. "0.10" meaning x.y.z.10): complete it with the
+        // network interface address. Kept for backward compatibility with
+        // old workspace files
         QStringList iFaceIP = m_ipAddr.toString().split(".");
         QStringList addList = address.split(".");
 
-        for (int i = 0; i < addList.count(); i++)
-            iFaceIP.replace(4 - addList.count() + i , addList.at(i));
+        if (addList.count() < 4)
+        {
+            qDebug() << "[setOutputIPAddress] Legacy IP style detected:" << address;
+            for (int i = 0; i < addList.count(); i++)
+                iFaceIP.replace(4 - addList.count() + i , addList.at(i));
 
-        QString newIP = iFaceIP.join(".");
-        hostAddress = QHostAddress(newIP);
+            QString newIP = iFaceIP.join(".");
+            hostAddress = QHostAddress(newIP);
+        }
+    }
+
+    if (hostAddress.isNull())
+    {
+        qWarning() << "[setOutputIPAddress] Invalid IP address:" << address
+                   << "- keeping current destination";
+        return false;
     }
 
     qDebug() << "[setOutputIPAddress] transmit to IP: " << hostAddress.toString();
@@ -208,6 +220,24 @@ bool ArtNetController::setOutputIPAddress(quint32 universe, QString address)
     m_universeMap[universe].outputAddress = hostAddress;
 
     return hostAddress == m_broadcastAddr;
+}
+
+bool ArtNetController::applyDiscoveredIP(quint32 universe, const QHostAddress &ip)
+{
+    if (ip.isNull() || !m_universeMap.contains(universe))
+        return false;
+
+    QMutexLocker locker(&m_dataMutex);
+
+    if ((m_universeMap[universe].type & Output) == 0)
+        return false;
+
+    m_universeMap[universe].outputAddress = ip;
+
+    qDebug() << "[ArtNet] Auto-configured universe" << universe
+             << "output to discovered node" << ip.toString();
+
+    return true;
 }
 
 bool ArtNetController::setOutputUniverse(quint32 universe, quint32 artnetUni)
@@ -415,7 +445,10 @@ bool ArtNetController::handleArtNetPollReply(QByteArray const& datagram, QHostAd
 #endif
 
     if (m_nodesList.contains(senderAddress) == false)
+    {
         m_nodesList[senderAddress] = newNode;
+        emit nodeDiscovered(m_line, senderAddress, newNode.oem, newNode.shortName);
+    }
 
     ++m_packetReceived;
     return true;
@@ -558,6 +591,11 @@ bool ArtNetController::handlePacket(QByteArray const& datagram, QHostAddress con
         qWarning() << "[ArtNet] Malformed packet received";
 
     return true;
+}
+
+void ArtNetController::sendPoll()
+{
+    slotSendPoll();
 }
 
 void ArtNetController::slotSendPoll()

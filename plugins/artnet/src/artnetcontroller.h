@@ -108,6 +108,12 @@ public:
      *  Return true if this restores default output IP address */
     bool setOutputIPAddress(quint32 universe, QString address);
 
+    /** Apply an IP address discovered through ArtPollReply to the given
+     *  QLC+ output universe. Unlike setOutputIPAddress(), this does NOT
+     *  restore the default value and always sets the given address.
+     *  Return true if the universe was updated */
+    bool applyDiscoveredIP(quint32 universe, const QHostAddress &ip);
+
     /** Set a specific ArtNet output universe for the given QLC+ universe.
      *  Return true if this restores default output universe */
     bool setOutputUniverse(quint32 universe, quint32 artnetUni);
@@ -146,6 +152,10 @@ public:
 
     /** Is the UDP socket capable of receiving packets ? */
     bool socketBound() const;
+
+    /** Force an immediate ArtPoll transmission, to refresh the list of
+     *  ArtNet nodes discovered on the network */
+    void sendPoll();
 
     /** Send a RDM command */
     bool sendRDMCommand(const quint32 universe, uchar command, QVariantList params);
@@ -218,6 +228,10 @@ signals:
     void valueChanged(quint32 universe, quint32 input, quint32 channel, uchar value);
 
     void rdmValueChanged(quint32 universe, quint32 line, QVariantMap data);
+
+    /** Emitted when a new ArtNet node is discovered through an ArtPollReply.
+     *  Only emitted the first time a node is seen on this controller */
+    void nodeDiscovered(quint32 line, QHostAddress address, quint16 oem, QString shortName);
 };
 
 #endif

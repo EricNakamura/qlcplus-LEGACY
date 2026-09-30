@@ -32,6 +32,10 @@
 
 #define SETTINGS_IFACE_WAIT_TIME "ArtNetPlugin/ifacewait"
 
+/** QSettings key to enable/disable the automatic configuration of
+ *  Easy ArtNet Interface devices discovered through ArtPollReply */
+#define SETTINGS_AUTOCONF "ArtNetPlugin/autoconf"
+
 typedef struct _aio
 {
     QNetworkInterface iface;
@@ -123,12 +127,25 @@ public:
     /** Get a list of the available Input/Output lines */
     QList<ArtNetIO> getIOMapping() const;
 
+    /** Return true if the automatic configuration of detected
+     *  Easy ArtNet Interface devices is enabled */
+    bool autoConfigure() const;
+
+    /** Enable/disable the automatic configuration of detected
+     *  Easy ArtNet Interface devices. The setting is also persisted
+     *  via QSettings */
+    void setAutoConfigure(bool enable);
+
 private:
     /** Map of the ArtNet plugin Input/Output lines */
     QList<ArtNetIO> m_IOmapping;
 
     /** Time to wait (in seconds) for interfaces to be ready */
     int m_ifaceWaitTime;
+
+    /** Enable automatic configuration (unicast IP) of Easy ArtNet
+     *  Interface devices discovered through ArtPollReply */
+    bool m_autoConfigure;
 
     /********************************************************************
      * RDM
@@ -149,6 +166,9 @@ private:
 
 private slots:
     void slotReadyRead();
+
+    /** Handle an ArtNet node discovered through ArtPollReply */
+    void slotNodeDiscovered(quint32 line, QHostAddress address, quint16 oem, QString shortName);
 
 private:
     QWeakPointer<QUdpSocket> m_udpSocket;

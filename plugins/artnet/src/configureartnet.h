@@ -20,6 +20,8 @@
 #ifndef CONFIGUREARTNET_H
 #define CONFIGUREARTNET_H
 
+#include <QHostAddress>
+
 #include "ui_configureartnet.h"
 
 class ArtNetPlugin;
@@ -41,10 +43,33 @@ public:
 public slots:
     int exec() override;
 
+private slots:
+    /** Search for an Easy ArtNet device and set it as output destination */
+    void slotAutoConfigure();
+
+    /** Second attempt of the auto-configuration, after an ArtPoll round trip */
+    void slotAutoConfigureRetry();
+
+    /** Force an ArtPoll transmission and rebuild the Nodes Tree */
+    void slotRefreshNodes();
+
+    /** Rebuild the Nodes Tree after the ArtPoll replies have been received */
+    void slotRebuildNodesTree();
+
 private:
     void fillNodesTree();
     void fillMappingTree();
     void showIPAlert(QString ip);
+
+    /** Return true and fill 'address' with the IP of the first discovered
+     *  Easy ArtNet device */
+    bool findEasyArtNetNode(QHostAddress &address) const;
+
+    /** Set the given IP address on every output item of the mapping tree */
+    void applyDeviceIP(const QHostAddress &address);
+
+    /** Send an ArtPoll packet on every available controller */
+    void triggerNodePoll() const;
 
 private:
     ArtNetPlugin* m_plugin;

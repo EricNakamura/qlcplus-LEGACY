@@ -232,17 +232,32 @@ bool ArtNetPacketizer::fillArtPollReplyInfo(QByteArray const& data, ArtNetNodeIn
     if (data.isNull())
         return false;
 
+    // An ArtPollReply is 239 bytes long. Be tolerant but make sure the
+    // bytes we are going to read are actually there
+    if (data.length() < 191)
+        return false;
+
     QByteArray shortName = data.mid(26, 18);
     QByteArray longName = data.mid(44, 64);
     QByteArray nodeReport = data.mid(108, 64);
-        uchar inputStatus = uchar(data.at(178));
+    Q_UNUSED(nodeReport);
 
     info.shortName = QString(shortName.replace(0, 0x20)).simplified();
     info.longName = QString(longName.replace(0, 0x20)).simplified();
     info.portsNumber = (uchar(data.at(172)) << 8) + uchar(data.at(173));
-    info.isInput = (inputStatus & 0x04) == 0 ? true : false;
-    info.isOutput = (inputStatus & 0x04) ? true : false;
-    info.universe = (ushort(data.at(18)) << 8) + (ushort(data.at(19)) << 4) + ushort(data.at(186));
+
+    // PortTypes[0]: bit 7 = port can output, bit 6 = port can input
+    uchar portTypes = uchar(data.at(174));
+    info.isInput = (portTypes & 0x40) ? true : false;
+    info.isOutput = (portTypes & 0x80) ? true : false;
+
+    info.oem = (quint16(uchar(data.at(20))) << 8) + quint16(uchar(data.at(21)));
+    info.bindIndex = data.length() > 211 ? quint8(data.at(211)) : 0;
+
+    // Universe = (NetSwitch << 8) | (SubSwitch << 4) | port address.
+    // Output nodes report their address in SwOut, inputs in SwIn
+    uchar portAddress = info.isOutput ? uchar(data.at(190)) : uchar(data.at(186));
+    info.universe = (ushort(data.at(18)) << 8) + (ushort(data.at(19)) << 4) + ushort(portAddress);
 
 #if 0
     qDebug() << "getArtPollReplyInfo shortName:" << info.shortName;

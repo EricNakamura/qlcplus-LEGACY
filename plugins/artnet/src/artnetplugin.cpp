@@ -41,6 +41,12 @@ void ArtNetPlugin::init()
     else
         m_ifaceWaitTime = 0;
 
+    value = settings.value(SETTINGS_AUTOCONF);
+    if (value.isValid() == true)
+        m_autoConfigure = value.toBool();
+    else
+        m_autoConfigure = true;
+
     foreach (QNetworkInterface iface, QNetworkInterface::allInterfaces())
     {
         foreach (QNetworkAddressEntry entry, iface.addressEntries())
@@ -190,6 +196,8 @@ bool ArtNetPlugin::openOutput(quint32 output, quint32 universe)
                 this, SIGNAL(valueChanged(quint32,quint32,quint32,uchar)));
         connect(controller, SIGNAL(rdmValueChanged(quint32, quint32, QVariantMap)),
                 this , SIGNAL(rdmValueChanged(quint32, quint32, QVariantMap)));
+        connect(controller, SIGNAL(nodeDiscovered(quint32,QHostAddress,quint16,QString)),
+                this, SLOT(slotNodeDiscovered(quint32,QHostAddress,quint16,QString)));
         m_IOmapping[output].controller = controller;
     }
 
@@ -382,6 +390,67 @@ QList<ArtNetIO> ArtNetPlugin::getIOMapping() const
     return m_IOmapping;
 }
 
+bool ArtNetPlugin::autoConfigure() const
+{
+    return m_autoConfigure;
+}
+
+void ArtNetPlugin::setAutoConfigure(bool enable)
+{
+    m_autoConfigure = enable;
+
+    QSettings settings;
+    settings.setValue(SETTINGS_AUTOCONF, enable);
+}
+
+void ArtNetPlugin::slotNodeDiscovered(quint32 line, QHostAddress address,
+                                      quint16 oem, QString shortName)
+{
+    if (m_autoConfigure == false)
+        return;
+
+    // Only auto-configure Easy ArtNet Interface devices. Every other
+    // ArtNet node keeps the current (manually configured) behaviour
+    ArtNetNodeInfo info;
+    info.shortName = shortName;
+    info.oem = oem;
+    if (info.isEasyArtNet() == false)
+        return;
+
+    if (line >= (quint32)m_IOmapping.count())
+        return;
+
+    ArtNetController *controller = m_IOmapping.at(line).controller;
+    if (controller == NULL)
+        return;
+
+    // The discovered node must be reachable on the same subnet of this line
+    if (address.isInSubnet(m_IOmapping.at(line).address.ip(),
+                           m_IOmapping.at(line).address.prefixLength()) == false)
+    {
+        qDebug() << "[ArtNet] Discovered Easy ArtNet node" << address.toString()
+                 << "is not on the same subnet of"
+                 << m_IOmapping.at(line).address.ip().toString();
+        return;
+    }
+
+    foreach (quint32 universe, controller->universesList())
+    {
+        UniverseInfo *uInfo = controller->getUniverseInfo(universe);
+        if (uInfo == NULL || (uInfo->type & ArtNetController::Output) == 0)
+            continue;
+
+        // Never override an IP address explicitly set by the user
+        QMap<QString, QVariant> params = getParameters(universe, line, Output);
+        if (params.contains(ARTNET_OUTPUTIP))
+            continue;
+
+        if (controller->applyDiscoveredIP(universe, address) == true)
+            qDebug() << "[ArtNet] Auto-configured universe" << (universe + 1)
+                     << "to Easy ArtNet device at" << address.toString();
+    }
+}
+
 /********************************************************************
  * RDM
  ********************************************************************/
@@ -426,6 +495,22 @@ QSharedPointer<QUdpSocket> ArtNetPlugin::getUdpSocket()
     return udpSocket;
 }
 
+/** The UDP socket is bound dual-stack, so IPv4 senders are reported as
+ *  IPv4-mapped IPv6 addresses (e.g. ::ffff:192.168.1.40). This converts them
+ *  back to plain IPv4 addresses, so subnet checks and comparisons work */
+static QHostAddress normalizedSenderAddress(const QHostAddress &address)
+{
+    if (address.protocol() == QAbstractSocket::IPv6Protocol)
+    {
+        bool ok = false;
+        quint32 ipv4 = address.toIPv4Address(&ok);
+        if (ok == true)
+            return QHostAddress(ipv4);
+    }
+
+    return address;
+}
+
 void ArtNetPlugin::slotReadyRead()
 {
     QUdpSocket* udpSocket = qobject_cast<QUdpSocket*>(sender());
@@ -437,7 +522,7 @@ void ArtNetPlugin::slotReadyRead()
     {
         datagram.resize(udpSocket->pendingDatagramSize());
         udpSocket->readDatagram(datagram.data(), datagram.size(), &senderAddress);
-        handlePacket(datagram, senderAddress);
+        handlePacket(datagram, normalizedSenderAddress(senderAddress));
     }
 }
 

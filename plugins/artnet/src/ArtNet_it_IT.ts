@@ -4,75 +4,75 @@
 <context>
     <name>ArtNetPlugin</name>
     <message>
-        <location filename="artnetplugin.cpp" line="97"/>
+        <location filename="artnetplugin.cpp" line="103"/>
         <source>This plugin provides DMX output for devices supporting the ArtNet communication protocol.</source>
         <oldsource>This plugin provides output for devices supporting the ArtNet communication protocol.</oldsource>
         <translation>Questa plugin permette la trasmissione di segnale DMX a dispositivi che supportano il protocollo di comunicazione ArtNet.</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="144"/>
+        <location filename="artnetplugin.cpp" line="150"/>
         <source>Output</source>
         <translation>Uscita</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="148"/>
-        <location filename="artnetplugin.cpp" line="298"/>
+        <location filename="artnetplugin.cpp" line="154"/>
+        <location filename="artnetplugin.cpp" line="306"/>
         <source>Status: Not open</source>
         <translation>Stato: Non aperto</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="151"/>
+        <location filename="artnetplugin.cpp" line="157"/>
         <source>Status: Open</source>
         <translation>Stato: Aperto</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="156"/>
+        <location filename="artnetplugin.cpp" line="162"/>
         <source>No</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="158"/>
+        <location filename="artnetplugin.cpp" line="164"/>
         <source>Yes</source>
         <translation>Sì</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="159"/>
+        <location filename="artnetplugin.cpp" line="165"/>
         <source>Can receive nodes information</source>
         <oldsource>Can receive node information</oldsource>
         <translation>Può ricevere informazioni dai nodi</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="162"/>
+        <location filename="artnetplugin.cpp" line="168"/>
         <source>Nodes discovered: </source>
         <translation>Nodi trovati: </translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="165"/>
+        <location filename="artnetplugin.cpp" line="171"/>
         <source>Packets sent: </source>
         <translation>Pacchetti inviati: </translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="294"/>
+        <location filename="artnetplugin.cpp" line="302"/>
         <source>Input</source>
         <translation>Ingresso</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="303"/>
+        <location filename="artnetplugin.cpp" line="311"/>
         <source>Bind failed</source>
         <translation>Connessione fallita</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="305"/>
+        <location filename="artnetplugin.cpp" line="313"/>
         <source>Open</source>
         <translation>Aperto</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="306"/>
+        <location filename="artnetplugin.cpp" line="314"/>
         <source>Status</source>
         <translation>Stato</translation>
     </message>
     <message>
-        <location filename="artnetplugin.cpp" line="309"/>
+        <location filename="artnetplugin.cpp" line="317"/>
         <source>Packets received: </source>
         <translation>Pacchetti ricevuti: </translation>
     </message>
@@ -121,70 +121,101 @@
     </message>
     <message>
         <location filename="configureartnet.ui" line="87"/>
+        <source>Auto-configure detected Easy ArtNet devices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configureartnet.ui" line="94"/>
+        <source>Auto-configure now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configureartnet.ui" line="112"/>
         <source>Seconds to wait for an interface to be ready</source>
         <translation>Secondi di attesa affinchè un&apos;interfaccia sia pronta</translation>
     </message>
     <message>
-        <location filename="configureartnet.ui" line="120"/>
+        <location filename="configureartnet.ui" line="145"/>
         <source>Nodes Tree</source>
         <translation>Albero dei Nodi</translation>
     </message>
     <message>
-        <location filename="configureartnet.ui" line="130"/>
+        <location filename="configureartnet.ui" line="155"/>
         <source>IP</source>
         <translation>IP</translation>
     </message>
     <message>
-        <location filename="configureartnet.ui" line="135"/>
+        <location filename="configureartnet.ui" line="160"/>
         <source>Short Name</source>
         <translation>Nome breve</translation>
     </message>
     <message>
-        <location filename="configureartnet.ui" line="140"/>
+        <location filename="configureartnet.ui" line="165"/>
         <source>Long Name</source>
         <translation>Nome lungo</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="90"/>
+        <location filename="configureartnet.ui" line="173"/>
+        <source>Refresh nodes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configureartnet.cpp" line="96"/>
         <source>%1 nodes</source>
         <translation>%1 nodi</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="128"/>
+        <location filename="configureartnet.cpp" line="134"/>
         <source>Inputs</source>
         <translation>Ingressi</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="134"/>
+        <location filename="configureartnet.cpp" line="140"/>
         <source>Outputs</source>
         <translation>Uscite</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="185"/>
+        <location filename="configureartnet.cpp" line="191"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="186"/>
+        <location filename="configureartnet.cpp" line="192"/>
         <source>Full</source>
         <translation>Completa</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="187"/>
+        <location filename="configureartnet.cpp" line="193"/>
         <source>Partial</source>
         <translation>Parziale</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="202"/>
+        <location filename="configureartnet.cpp" line="208"/>
         <source>Invalid IP</source>
         <translation>IP non valido</translation>
     </message>
     <message>
-        <location filename="configureartnet.cpp" line="202"/>
+        <location filename="configureartnet.cpp" line="208"/>
         <source>%1 is not a valid IP.
 Please fix it before confirming.</source>
         <translation>%1 non è un IP valido.
 Correggilo prima di confermare.</translation>
+    </message>
+    <message>
+        <location filename="configureartnet.cpp" line="352"/>
+        <location filename="configureartnet.cpp" line="372"/>
+        <source>Device found at %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configureartnet.cpp" line="359"/>
+        <source>Searching for Easy ArtNet devices...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configureartnet.cpp" line="376"/>
+        <source>No device found. Check the network cable and try again.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

@@ -25,6 +25,8 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QLabel>
+#include <QTimer>
+#include <QHashIterator>
 #include <QDebug>
 
 #include "configureartnet.h"
@@ -63,6 +65,10 @@ ConfigureArtNet::ConfigureArtNet(ArtNetPlugin* plugin, QWidget* parent)
 
     fillNodesTree();
     fillMappingTree();
+
+    m_autoconfCheck->setChecked(m_plugin->autoConfigure());
+    connect(m_autoconfigureButton, SIGNAL(clicked()), this, SLOT(slotAutoConfigure()));
+    connect(m_refreshNodesButton, SIGNAL(clicked()), this, SLOT(slotRefreshNodes()));
 
     QSettings settings;
     QVariant value = settings.value(SETTINGS_IFACE_WAIT_TIME);
@@ -274,7 +280,113 @@ void ConfigureArtNet::accept()
     else
         settings.setValue(SETTINGS_IFACE_WAIT_TIME, waitTime);
 
+    m_plugin->setAutoConfigure(m_autoconfCheck->isChecked());
+
     QDialog::accept();
+}
+
+/*****************************************************************************
+ * Auto-configuration
+ *****************************************************************************/
+
+bool ConfigureArtNet::findEasyArtNetNode(QHostAddress &address) const
+{
+    foreach (ArtNetIO io, m_plugin->getIOMapping())
+    {
+        if (io.controller == NULL)
+            continue;
+
+        QHash<QHostAddress, ArtNetNodeInfo> nodesList = io.controller->getNodesList();
+        QHashIterator<QHostAddress, ArtNetNodeInfo> it(nodesList);
+        while (it.hasNext())
+        {
+            it.next();
+            if (it.value().isEasyArtNet() == true)
+            {
+                address = it.key();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void ConfigureArtNet::applyDeviceIP(const QHostAddress &address)
+{
+    for (int i = 0; i < m_uniMapTree->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem *topItem = m_uniMapTree->topLevelItem(i);
+        for (int c = 0; c < topItem->childCount(); c++)
+        {
+            QTreeWidgetItem *item = topItem->child(c);
+            if (item->data(KMapColumnInterface, PROP_TYPE).toInt() != ArtNetController::Output)
+                continue;
+
+            QLineEdit *ipEdit = qobject_cast<QLineEdit*>(m_uniMapTree->itemWidget(item, KMapColumnIPAddress));
+            if (ipEdit != NULL)
+                ipEdit->setText(address.toString());
+            else
+                item->setText(KMapColumnIPAddress, address.toString());
+        }
+    }
+}
+
+void ConfigureArtNet::triggerNodePoll() const
+{
+    foreach (ArtNetIO io, m_plugin->getIOMapping())
+    {
+        if (io.controller != NULL)
+            io.controller->sendPoll();
+    }
+}
+
+void ConfigureArtNet::slotAutoConfigure()
+{
+    QHostAddress deviceIP;
+
+    // Most of the times the periodic ArtPoll already discovered the node
+    if (findEasyArtNetNode(deviceIP) == true)
+    {
+        applyDeviceIP(deviceIP);
+        m_autoconfStatus->setText(tr("Device found at %1").arg(deviceIP.toString()));
+        return;
+    }
+
+    // Otherwise force a poll and give the node some time to reply
+    triggerNodePoll();
+    m_autoconfigureButton->setEnabled(false);
+    m_autoconfStatus->setText(tr("Searching for Easy ArtNet devices..."));
+    QTimer::singleShot(1500, this, SLOT(slotAutoConfigureRetry()));
+}
+
+void ConfigureArtNet::slotAutoConfigureRetry()
+{
+    QHostAddress deviceIP;
+
+    m_autoconfigureButton->setEnabled(true);
+
+    if (findEasyArtNetNode(deviceIP) == true)
+    {
+        applyDeviceIP(deviceIP);
+        m_autoconfStatus->setText(tr("Device found at %1").arg(deviceIP.toString()));
+    }
+    else
+    {
+        m_autoconfStatus->setText(tr("No device found. Check the network cable and try again."));
+    }
+}
+
+void ConfigureArtNet::slotRefreshNodes()
+{
+    triggerNodePoll();
+    QTimer::singleShot(1000, this, SLOT(slotRebuildNodesTree()));
+}
+
+void ConfigureArtNet::slotRebuildNodesTree()
+{
+    m_nodesTree->clear();
+    fillNodesTree();
 }
 
 int ConfigureArtNet::exec()
