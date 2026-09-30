@@ -1,0 +1,98 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build: debug",
+            "detail": "macos-debug preset (tests + fixture editor) -> ./build",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": [],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "build: fast",
+            "detail": "macos-debug-fast preset (no tests, no fixture editor)",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": ["fast"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "build: release",
+            "detail": "macos-release preset (RelWithDebInfo)",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": ["release"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "build: package",
+            "detail": "macos-package preset (Release + bundle deploy/sign)",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": ["package"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "run: qlcplus",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["-C", "build", "run"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "dependsOn": "build: debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "run: fixture editor",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["-C", "build", "run-fxe"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "dependsOn": "build: debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "test: ui",
+            "type": "shell",
+            "command": "./unittest.sh",
+            "args": ["ui"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "dependsOn": "build: debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "install: debug (build)",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["-C", "build", "install"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "dependsOn": "build: debug",
+            "problemMatcher": []
+        },
+        {
+            "label": "install: package",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["-C", "build/macos-package", "install"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "dependsOn": "build: package",
+            "problemMatcher": []
+        },
+        {
+            "label": "clean: build",
+            "type": "shell",
+            "command": "ninja",
+            "args": ["-C", "build", "-t", "clean"],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": []
+        }
+    ]
+}

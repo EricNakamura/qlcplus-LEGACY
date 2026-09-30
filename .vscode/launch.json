@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug QLC+ (build/)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/main/qlcplus",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "miDebuggerPath": "/usr/bin/lldb",
+            "preLaunchTask": "build: debug",
+            "setupCommands": [
+                {
+                    "description": "Disable lldb stop-on-crash prompts",
+                    "text": "settings set target.process.stop-on-exec false",
+                    "ignoreFailures": true
+                }
+            ],
+            "visualizerFile": "/Users/ericbafa/Library/Application Support/Code/User/workspaceStorage/0f6ea710b284506578977fc2347e3b15/tonka3000.qtvsctools/qt.natvis.xml"
+        },
+        {
+            "name": "Debug QLC+ (no rebuild)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/main/qlcplus",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "miDebuggerPath": "/usr/bin/lldb",
+            "visualizerFile": "/Users/ericbafa/Library/Application Support/Code/User/workspaceStorage/0f6ea710b284506578977fc2347e3b15/tonka3000.qtvsctools/qt.natvis.xml"
+        },
+        {
+            "name": "Debug Fixture Editor (build/)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/fixtureeditor/qlcplus-fixtureeditor",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "miDebuggerPath": "/usr/bin/lldb",
+            "preLaunchTask": "build: debug",
+            "visualizerFile": "/Users/ericbafa/Library/Application Support/Code/User/workspaceStorage/0f6ea710b284506578977fc2347e3b15/tonka3000.qtvsctools/qt.natvis.xml"
+        }
+    ]
+}

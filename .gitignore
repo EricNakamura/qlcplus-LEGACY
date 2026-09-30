@@ -49,7 +49,9 @@ coverage/
 *.gcno
 
 # Development IDEs
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
 
 # CMake build
 CMakeLists.txt.user
