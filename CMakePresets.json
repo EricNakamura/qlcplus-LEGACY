@@ -1,0 +1,108 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "macos-base",
+      "hidden": true,
+      "displayName": "macOS base (Homebrew Qt 6, Ninja, ccache)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "/opt/homebrew/lib/cmake/Qt6/qt.toolchain.cmake",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0",
+        "QLC_USE_CCACHE": "ON",
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+      }
+    },
+    {
+      "name": "macos-debug",
+      "inherits": "macos-base",
+      "displayName": "macOS Debug",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "macos-debug-fast",
+      "inherits": "macos-base",
+      "displayName": "macOS Debug (no tests, no fixture editor)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "QLC_BUILD_TESTS": "OFF",
+        "QLC_BUILD_FXE": "OFF"
+      }
+    },
+    {
+      "name": "macos-release",
+      "inherits": "macos-base",
+      "displayName": "macOS RelWithDebInfo",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "macos-package",
+      "inherits": "macos-base",
+      "displayName": "macOS Release + bundle deploy/sign",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "QLC_MACOS_PACKAGE": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-debug",
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "macos-debug-fast",
+      "configurePreset": "macos-debug-fast"
+    },
+    {
+      "name": "macos-release",
+      "configurePreset": "macos-release"
+    },
+    {
+      "name": "macos-package",
+      "configurePreset": "macos-package"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "macos-debug",
+      "steps": [
+        { "type": "configure", "name": "macos-debug" },
+        { "type": "build", "name": "macos-debug" }
+      ]
+    },
+    {
+      "name": "macos-debug-fast",
+      "steps": [
+        { "type": "configure", "name": "macos-debug-fast" },
+        { "type": "build", "name": "macos-debug-fast" }
+      ]
+    },
+    {
+      "name": "macos-release",
+      "steps": [
+        { "type": "configure", "name": "macos-release" },
+        { "type": "build", "name": "macos-release" }
+      ]
+    },
+    {
+      "name": "macos-package",
+      "steps": [
+        { "type": "configure", "name": "macos-package" },
+        { "type": "build", "name": "macos-package" }
+      ]
+    }
+  ]
+}
