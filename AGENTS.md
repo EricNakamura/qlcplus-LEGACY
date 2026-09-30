@@ -2,6 +2,23 @@
 
 Guidance for AI coding agents working in this repository.
 
+## Scope restriction — TOTAL (read first)
+
+The agent MUST only read and write files **inside this repository folder**
+(`/Users/ericbafa/www/qlcplus-LEGACY`).
+
+- **NEVER** create, edit, move or delete any file outside this folder — no
+  exceptions, even when it looks related or necessary. This includes sibling
+  repos such as `/Users/ericbafa/www/easy-artnet-interface`, Arduino libraries
+  (`~/Documents/Arduino`, `~/Library/Arduino15`), system configs and the home dir.
+- **NEVER** run state-changing commands outside this folder (e.g. `git checkout`
+  in another repository, installs, or edits under `~`).
+- **Reading** external files for context is allowed **only when the user
+  explicitly asks for it**; writing is always forbidden.
+- If a task seems to require changes outside this folder, **STOP and ask the
+  user**. Provide the proposed external changes as text/patch in the response so
+  the user can apply them manually.
+
 ## What this project is
 
 **Q Light Controller Plus (QLC+)** — a cross-platform C++/Qt lighting-control application (DMX, Art-Net, sACN, MIDI, OSC, …). This checkout is the **LEGACY v4 branch** (QtWidget UI), a personal fork of `mcallegari/qlcplus` at `github.com/EricNakamura/qlcplus-LEGACY`, version `4.14.5 GIT`.
