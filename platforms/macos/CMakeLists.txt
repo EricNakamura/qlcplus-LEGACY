@@ -165,17 +165,17 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
 # ==============================================================================
 # 2. AUTOMAÇÃO: EMPACOTAMENTO E ASSINATURA PÓS-INSTALAÇÃO
 # ==============================================================================
-if(APPLE)
+if(APPLE AND QLC_MACOS_PACKAGE)
     # Garante o qt.conf
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" "[Paths]\nPlugins = PlugIns\n")
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" DESTINATION "/Users/ericbafa/QLC+.app/Contents/Resources")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" DESTINATION "${INSTALLROOT}/Resources")
 
-    install(CODE [=[
+    set(_macos_deploy_code [=[
         message(STATUS "==================================================")
         message(STATUS "🚀 DEPLOY: Resolvendo Qt para múltiplos binários...")
         message(STATUS "==================================================")
         
-        set(APP_PATH "/Users/ericbafa/QLC+.app")
+        set(APP_PATH "@QLC_MACOS_APP_PATH@")
         
         # --- O CAÇA-FANTASMAS DO PLIST ---
         # Acha tudo que começa com Info.plist
@@ -201,7 +201,7 @@ if(APPLE)
         
         # 3. Executa o macdeployqt 
         execute_process(
-            COMMAND /opt/homebrew/opt/qt/bin/macdeployqt "${APP_PATH}" ${EXEC_FLAGS} -libpath=/opt/homebrew/lib
+            COMMAND @MACDEPLOYQT_EXECUTABLE@ "${APP_PATH}" ${EXEC_FLAGS} -libpath=@QLC_MACOS_QT_LIBPATH@
             RESULT_VARIABLE MACDEPLOY_RESULT
         )
         
@@ -226,4 +226,6 @@ if(APPLE)
             endif()
         endif()
     ]=])
+    string(CONFIGURE "${_macos_deploy_code}" _macos_deploy_code @ONLY)
+    install(CODE "${_macos_deploy_code}")
 endif()

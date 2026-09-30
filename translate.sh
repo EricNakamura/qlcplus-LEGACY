@@ -84,9 +84,10 @@ case "$ACTION" in
       # Gather files
       files_tmp="$(mktemp)"
       if [[ "$FLAVOR" == "qmlui" ]]; then
-        find . -type f -path "./qmlui/*" -name "*_${lang}.ts" > "$files_tmp"
+        find ./qmlui -type f -name "*_${lang}.ts" > "$files_tmp"
       else
-        find . -type f -not -path "./qmlui/*" -name "*_${lang}.ts" > "$files_tmp"
+        find . -type d \( -name build -o -name "build-*" -o -name qmlui \) -prune \
+             -o -type f -name "*_${lang}.ts" -print > "$files_tmp"
       fi
       if ! [ -s "$files_tmp" ]; then
         echo "  No TS files for $lang, skipping."

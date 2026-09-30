@@ -188,3 +188,7 @@ install(TARGETS ${module_name}
     LIBRARY DESTINATION ${INSTALLROOT}/${LIBSDIR}
     RUNTIME DESTINATION ${INSTALLROOT}/${LIBSDIR}
 )
+
+if(QLC_USE_PCH)
+    target_precompile_headers(${module_name} PRIVATE qlcplus_pch.h)
+endif()

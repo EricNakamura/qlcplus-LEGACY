@@ -1,7 +1,9 @@
 project(ui)
 
 add_subdirectory(src)
-add_subdirectory(test)
+if(QLC_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
 add_library(qlcplusui_ui STATIC
 )

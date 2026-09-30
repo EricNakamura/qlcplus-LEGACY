@@ -12,6 +12,57 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
+# --- Dev build speed options -------------------------------------------------
+# Runs macdeployqt + ad-hoc codesign on 'install'. It is slow, so it is off by
+# default and enabled explicitly by the macos-package preset.
+option(QLC_MACOS_PACKAGE "Deploy and ad-hoc sign the macOS bundle on install" OFF)
+
+# Wire the ccache compiler launcher when available. Enabled by default on Apple
+# only, to avoid changing behavior on Linux/CI.
+if(APPLE)
+    set(QLC_USE_CCACHE_DEFAULT ON)
+else()
+    set(QLC_USE_CCACHE_DEFAULT OFF)
+endif()
+option(QLC_USE_CCACHE "Use ccache to speed up compilation when available" ${QLC_USE_CCACHE_DEFAULT})
+
+if(QLC_USE_CCACHE AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
+    find_program(CCACHE_EXECUTABLE ccache)
+    if(CCACHE_EXECUTABLE)
+        set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})
+        set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})
+        message(STATUS "ccache encontrado: ${CCACHE_EXECUTABLE}")
+    else()
+        message(STATUS "ccache nao encontrado. Build sem cache de compilador.")
+    endif()
+endif()
+
+# Keep line tables for stack traces but drop the large/slow full debug info.
+# Added last so it overrides the -g coming from the build type flags.
+option(QLC_LEAN_DEBUG "Use lightweight debug info (-gline-tables-only) on Apple" ON)
+if(APPLE AND QLC_LEAN_DEBUG)
+    add_compile_options("$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-gline-tables-only>")
+endif()
+
+# Optional targets. Skipping tests and/or the standalone fixture editor speeds
+# up day-to-day builds. Both default to ON so 'check' keeps working as before.
+option(QLC_BUILD_TESTS "Configure and build the unit test targets" ON)
+option(QLC_BUILD_FXE "Build the standalone fixture editor" ON)
+
+# Precompiled headers (opt-in). Speed up incremental rebuilds of the heavy
+# targets, but they reduce ccache effectiveness, hence OFF by default.
+option(QLC_USE_PCH "Use precompiled headers on the heavy targets" OFF)
+
+# macOS packaging paths used by the QLC_MACOS_PACKAGE step. Overridable from the
+# command line so the packaging automation is no longer tied to one machine.
+if(APPLE)
+    set(QLC_MACOS_APP_PATH "$ENV{HOME}/QLC+.app" CACHE PATH "macOS .app bundle path used by the packaging step")
+    set(QLC_MACOS_QT_LIBPATH "/opt/homebrew/lib" CACHE PATH "Extra library search path passed to macdeployqt")
+    if(NOT MACDEPLOYQT_EXECUTABLE)
+        find_program(MACDEPLOYQT_EXECUTABLE macdeployqt)
+    endif()
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Prevent CMake make install strips off non-standard build paths
@@ -24,18 +75,16 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 if(UNIX)
     if (APPLE)
         set(iokit ON)
 
-if(APPLE)
+if(APPLE AND QLC_MACOS_PACKAGE)
     install(CODE "
         message(STATUS \"==================================================\")
         message(STATUS \"🧹 LIMPEZA: Apagando versão antiga do QLC+.app...\")
         message(STATUS \"==================================================\")
-        file(REMOVE_RECURSE \"/Users/ericbafa/QLC+.app\")
+        file(REMOVE_RECURSE \"${QLC_MACOS_APP_PATH}\")
     ")
 endif()
     else()
@@ -103,7 +152,9 @@ else()
     message("Building QLC+ 4 QtWidget UI")
     add_subdirectory(ui)
     add_subdirectory(main)
-    add_subdirectory(fixtureeditor)
+    if(QLC_BUILD_FXE)
+        add_subdirectory(fixtureeditor)
+    endif()
     
 endif()
 if(APPLE AND NOT qmlui)
@@ -166,13 +217,16 @@ add_custom_target(lcov
 )
 
 # Translations
+# NOTE: this target is deliberately NOT part of ALL. Running lrelease on every
+# build added several seconds to each 'ninja' invocation. It is generated on
+# demand and lazily refreshed by the install rule below.
 if (qmlui)
-  add_custom_target(translations ALL
+  add_custom_target(translations
     COMMAND ./translate.sh release qmlui
     COMMENT "Translating qmlui translations..."
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 else ()
-  add_custom_target(translations ALL
+  add_custom_target(translations
     COMMAND ./translate.sh release ui
     COMMENT "Translating ui translations..."
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -188,8 +242,14 @@ endif()
 # Define the pattern for the .qm files
 set(translations_qm_pattern "${CMAKE_CURRENT_SOURCE_DIR}/qlcplus_*.qm")
 
-# Install command using a custom script
+# Install command using a custom script.
+# Since the translations target is not part of ALL anymore, build it here so
+# that 'install' always ships up-to-date .qm files (POSIX only, translate.sh
+# is a shell script).
 install(CODE "
+  if(NOT WIN32)
+    execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target translations)
+  endif()
   file(GLOB qm_files \"${translations_qm_pattern}\")
   foreach(file IN LISTS qm_files)
     file(INSTALL DESTINATION \"${translations_install_path}\" TYPE FILE FILES \"\${file}\")
