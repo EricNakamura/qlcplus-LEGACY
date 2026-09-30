@@ -83,6 +83,9 @@ public:
     /* Check if this is the virtual console's draw area */
     bool isBottomFrame() const;
 
+    /** @reimp */
+    bool canSnapToGrid() const override;
+
     /*********************************************************************
      * GUI
      *********************************************************************/
@@ -313,6 +316,7 @@ public:
 protected:
     void handleWidgetSelection(QMouseEvent* e) override;
     void mouseMoveEvent(QMouseEvent* e) override;
+    void paintEvent(QPaintEvent* e) override;
 };
 
 /** @} */

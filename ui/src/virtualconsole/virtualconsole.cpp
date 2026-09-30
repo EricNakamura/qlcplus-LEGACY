@@ -1007,6 +1007,7 @@ void VirtualConsole::slotToolsSettings()
     {
         m_properties = vcpe.properties();
         contents()->resize(m_properties.size());
+        contents()->update();
         m_doc->inputOutputMap()->setGrandMasterChannelMode(m_properties.grandMasterChannelMode());
         m_doc->inputOutputMap()->setGrandMasterValueMode(m_properties.grandMasterValueMode());
         if (m_dockArea != NULL)

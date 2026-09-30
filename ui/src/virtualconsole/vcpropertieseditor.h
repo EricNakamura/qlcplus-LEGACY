@@ -86,6 +86,14 @@ private slots:
     void slotSizeYChanged(int value);
 
     /*************************************************************************
+     * Grid
+     *************************************************************************/
+private slots:
+    void slotGridSizeChanged(int value);
+    void slotGridVisibleToggled(bool checked);
+    void slotGridSnapToggled(bool checked);
+
+    /*************************************************************************
      * Widgets page
      *************************************************************************/
 protected slots:

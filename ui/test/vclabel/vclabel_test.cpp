@@ -65,7 +65,7 @@ void VCLabel_Test::initial()
     QCOMPARE(label.objectName(), QString("VCLabel"));
     QCOMPARE(label.frameStyle(), 0);
     QCOMPARE(label.caption(), tr("Label"));
-    QCOMPARE(label.size(), QSize(100, 30));
+    QCOMPARE(label.size(), QSize(100, 20));
 }
 
 void VCLabel_Test::copy()

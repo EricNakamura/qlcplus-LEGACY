@@ -33,6 +33,9 @@
 
 VCProperties::VCProperties()
     : m_size(QSize(1920, 1080))
+    , m_gridSize(QSize(VC_GRID_DEFAULT_SIZE, VC_GRID_DEFAULT_SIZE))
+    , m_gridVisible(true)
+    , m_gridSnap(true)
     , m_gmVisible(true)
     , m_gmChannelMode(GrandMaster::Intensity)
     , m_gmValueMode(GrandMaster::Reduce)
@@ -44,6 +47,9 @@ VCProperties::VCProperties()
 
 VCProperties::VCProperties(const VCProperties& properties)
     : m_size(properties.m_size)
+    , m_gridSize(properties.m_gridSize)
+    , m_gridVisible(properties.m_gridVisible)
+    , m_gridSnap(properties.m_gridSnap)
     , m_gmVisible(properties.m_gmVisible)
     , m_gmChannelMode(properties.m_gmChannelMode)
     , m_gmValueMode(properties.m_gmValueMode)
@@ -62,6 +68,9 @@ VCProperties &VCProperties::operator=(const VCProperties &props)
     if (this != &props)
     {
         m_size = props.m_size;
+        m_gridSize = props.m_gridSize;
+        m_gridVisible = props.m_gridVisible;
+        m_gridSnap = props.m_gridSnap;
         m_gmVisible = props.m_gmVisible;
         m_gmChannelMode = props.m_gmChannelMode;
         m_gmValueMode = props.m_gmValueMode;
@@ -85,6 +94,40 @@ void VCProperties::setSize(const QSize& size)
 QSize VCProperties::size() const
 {
     return m_size;
+}
+
+/*****************************************************************************
+ * Grid
+ *****************************************************************************/
+
+void VCProperties::setGridSize(const QSize& size)
+{
+    m_gridSize = size;
+}
+
+QSize VCProperties::gridSize() const
+{
+    return m_gridSize;
+}
+
+void VCProperties::setGridVisible(bool visible)
+{
+    m_gridVisible = visible;
+}
+
+bool VCProperties::gridVisible() const
+{
+    return m_gridVisible;
+}
+
+void VCProperties::setGridSnap(bool snap)
+{
+    m_gridSnap = snap;
+}
+
+bool VCProperties::gridSnap() const
+{
+    return m_gridSnap;
 }
 
 /*****************************************************************************
@@ -181,6 +224,35 @@ bool VCProperties::loadXML(QXmlStreamReader &root)
                 setSize(sz);
             root.skipCurrentElement();
         }
+        else if (root.name() == KXMLQLCVCPropertiesGrid)
+        {
+            QXmlStreamAttributes attrs = root.attributes();
+            QSize gsz(m_gridSize);
+
+            /* Cell width */
+            str = attrs.value(KXMLQLCVCPropertiesGridX).toString();
+            if (str.isEmpty() == false)
+                gsz.setWidth(str.toInt());
+
+            /* Cell height */
+            str = attrs.value(KXMLQLCVCPropertiesGridY).toString();
+            if (str.isEmpty() == false)
+                gsz.setHeight(str.toInt());
+
+            /* Set grid size if both are valid (must be at least 1px) */
+            if (gsz.isValid() == true && gsz.width() > 0 && gsz.height() > 0)
+                setGridSize(gsz);
+
+            /* Grid visibility */
+            if (attrs.hasAttribute(KXMLQLCVCPropertiesGridVisible))
+                setGridVisible(attrs.value(KXMLQLCVCPropertiesGridVisible).toString() == "1");
+
+            /* Grid snapping */
+            if (attrs.hasAttribute(KXMLQLCVCPropertiesGridSnap))
+                setGridSnap(attrs.value(KXMLQLCVCPropertiesGridSnap).toString() == "1");
+
+            root.skipCurrentElement();
+        }
         else if (root.name() == KXMLQLCVCPropertiesGrandMaster)
         {
             QXmlStreamAttributes attrs = root.attributes();
@@ -242,6 +314,14 @@ bool VCProperties::saveXML(QXmlStreamWriter *doc) const
     doc->writeStartElement(KXMLQLCVCPropertiesSize);
     doc->writeAttribute(KXMLQLCVCPropertiesSizeWidth, QString::number(size().width()));
     doc->writeAttribute(KXMLQLCVCPropertiesSizeHeight, QString::number(size().height()));
+    doc->writeEndElement();
+
+    /* Grid */
+    doc->writeStartElement(KXMLQLCVCPropertiesGrid);
+    doc->writeAttribute(KXMLQLCVCPropertiesGridX, QString::number(gridSize().width()));
+    doc->writeAttribute(KXMLQLCVCPropertiesGridY, QString::number(gridSize().height()));
+    doc->writeAttribute(KXMLQLCVCPropertiesGridVisible, gridVisible() ? QStringLiteral("1") : QStringLiteral("0"));
+    doc->writeAttribute(KXMLQLCVCPropertiesGridSnap, gridSnap() ? QStringLiteral("1") : QStringLiteral("0"));
     doc->writeEndElement();
 
     /***********************

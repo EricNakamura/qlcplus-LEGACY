@@ -52,6 +52,15 @@ class Doc;
 #define KXMLQLCVCPropertiesInputUniverse QStringLiteral("Universe")
 #define KXMLQLCVCPropertiesInputChannel  QStringLiteral("Channel")
 
+#define KXMLQLCVCPropertiesGrid         QStringLiteral("Grid")
+#define KXMLQLCVCPropertiesGridX        QStringLiteral("X")
+#define KXMLQLCVCPropertiesGridY        QStringLiteral("Y")
+#define KXMLQLCVCPropertiesGridVisible  QStringLiteral("Visible")
+#define KXMLQLCVCPropertiesGridSnap     QStringLiteral("Snap")
+
+/** Default grid cell size (in pixels) for the Virtual Console workspace */
+#define VC_GRID_DEFAULT_SIZE 20
+
 /*****************************************************************************
  * Properties
  *****************************************************************************/
@@ -77,6 +86,33 @@ public:
 
 private:
     QSize m_size;
+
+    /*********************************************************************
+     * Grid
+     *********************************************************************/
+public:
+    /** Set the Virtual Console grid cell size (in pixels) */
+    void setGridSize(const QSize& size);
+
+    /** Get the Virtual Console grid cell size (in pixels) */
+    QSize gridSize() const;
+
+    /** Set whether the grid is drawn on the Virtual Console workspace */
+    void setGridVisible(bool visible);
+
+    /** Check whether the grid is drawn on the Virtual Console workspace */
+    bool gridVisible() const;
+
+    /** Set whether widgets snap to the grid while moving/resizing */
+    void setGridSnap(bool snap);
+
+    /** Check whether widgets snap to the grid while moving/resizing */
+    bool gridSnap() const;
+
+private:
+    QSize m_gridSize;
+    bool m_gridVisible;
+    bool m_gridSnap;
 
     /*************************************************************************
      * Grand Master

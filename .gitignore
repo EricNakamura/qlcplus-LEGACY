@@ -68,6 +68,6 @@ build*
 CMakeFiles/
 .qt/
 
-test/
+*.plist
 install_manifest.txt
 ui/src/qlcui.qrc.depends

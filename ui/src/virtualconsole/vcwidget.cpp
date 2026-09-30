@@ -50,8 +50,6 @@
 #include "vcwidget.h"
 #include "doc.h"
 
-#define GRID_RESOLUTION 5
-
 VCWidget::VCWidget(QWidget* parent, Doc* doc)
     : QWidget(parent)
     , m_doc(doc)
@@ -1261,9 +1259,21 @@ void VCWidget::resize(const QSize& size)
 {
     QSize sz(size);
 
-    // Force grid settings
-    sz.setWidth(size.width() - (size.width() % GRID_RESOLUTION));
-    sz.setHeight(size.height() - (size.height() % GRID_RESOLUTION));
+    /* Snap to the configured grid, unless this widget must not be constrained */
+    if (canSnapToGrid() == true && VirtualConsole::instance() != NULL)
+    {
+        VCProperties props = VirtualConsole::instance()->properties();
+
+        if (props.gridSnap() == true)
+        {
+            QSize grid = props.gridSize();
+            int gx = grid.width() > 0 ? grid.width() : 1;
+            int gy = grid.height() > 0 ? grid.height() : 1;
+
+            sz.setWidth(size.width() - (size.width() % gx));
+            sz.setHeight(size.height() - (size.height() % gy));
+        }
+    }
 
     // Resize
     QWidget::resize(sz);
@@ -1273,9 +1283,21 @@ void VCWidget::move(const QPoint& point)
 {
     QPoint pt(point);
 
-    // Force grid settings
-    pt.setX(point.x() - (point.x() % GRID_RESOLUTION));
-    pt.setY(point.y() - (point.y() % GRID_RESOLUTION));
+    /* Snap to the configured grid, unless this widget must not be constrained */
+    if (canSnapToGrid() == true && VirtualConsole::instance() != NULL)
+    {
+        VCProperties props = VirtualConsole::instance()->properties();
+
+        if (props.gridSnap() == true)
+        {
+            QSize grid = props.gridSize();
+            int gx = grid.width() > 0 ? grid.width() : 1;
+            int gy = grid.height() > 0 ? grid.height() : 1;
+
+            pt.setX(point.x() - (point.x() % gx));
+            pt.setY(point.y() - (point.y() % gy));
+        }
+    }
 
     // Don't move beyond left or right
     if (pt.x() < 0)
@@ -1293,6 +1315,11 @@ void VCWidget::move(const QPoint& point)
     QWidget::move(pt);
 
     m_doc->setModified();
+}
+
+bool VCWidget::canSnapToGrid() const
+{
+    return true;
 }
 
 QPoint VCWidget::lastClickPoint() const

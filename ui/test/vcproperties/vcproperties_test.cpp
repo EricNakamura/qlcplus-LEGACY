@@ -49,6 +49,9 @@ void VCProperties_Test::initial()
     VCProperties p;
 
     QCOMPARE(p.m_size, QSize(1920, 1080));
+    QCOMPARE(p.m_gridSize, QSize(20, 20));
+    QCOMPARE(p.m_gridVisible, true);
+    QCOMPARE(p.m_gridSnap, true);
     QCOMPARE(p.m_gmChannelMode, GrandMaster::Intensity);
     QCOMPARE(p.m_gmValueMode, GrandMaster::Reduce);
     QCOMPARE(p.m_gmInputUniverse, InputOutputMap::invalidUniverse());
@@ -59,6 +62,9 @@ void VCProperties_Test::copy()
 {
     VCProperties p;
     p.m_size = QSize(1, 2);
+    p.m_gridSize = QSize(30, 40);
+    p.m_gridVisible = false;
+    p.m_gridSnap = false;
     p.m_gmChannelMode = GrandMaster::AllChannels;
     p.m_gmValueMode = GrandMaster::Limit;
     p.m_gmInputUniverse = 5;
@@ -66,6 +72,9 @@ void VCProperties_Test::copy()
 
     VCProperties p2(p);
     QCOMPARE(p2.m_size, p.m_size);
+    QCOMPARE(p2.m_gridSize, p.m_gridSize);
+    QCOMPARE(p2.m_gridVisible, p.m_gridVisible);
+    QCOMPARE(p2.m_gridSnap, p.m_gridSnap);
     QCOMPARE(p2.m_gmChannelMode, p.m_gmChannelMode);
     QCOMPARE(p2.m_gmValueMode, p.m_gmValueMode);
     QCOMPARE(p2.m_gmInputUniverse, p.m_gmInputUniverse);
@@ -73,6 +82,9 @@ void VCProperties_Test::copy()
 
     VCProperties p3 = p;
     QCOMPARE(p3.m_size, p.m_size);
+    QCOMPARE(p3.m_gridSize, p.m_gridSize);
+    QCOMPARE(p3.m_gridVisible, p.m_gridVisible);
+    QCOMPARE(p3.m_gridSnap, p.m_gridSnap);
     QCOMPARE(p3.m_gmChannelMode, p.m_gmChannelMode);
     QCOMPARE(p3.m_gmValueMode, p.m_gmValueMode);
     QCOMPARE(p3.m_gmInputUniverse, p.m_gmInputUniverse);
@@ -121,6 +133,14 @@ void VCProperties_Test::loadXMLHappy()
     xmlWriter.writeAttribute("Height", "20");
     xmlWriter.writeEndElement();
 
+    // Grid
+    xmlWriter.writeStartElement("Grid");
+    xmlWriter.writeAttribute("X", "15");
+    xmlWriter.writeAttribute("Y", "25");
+    xmlWriter.writeAttribute("Visible", "0");
+    xmlWriter.writeAttribute("Snap", "1");
+    xmlWriter.writeEndElement();
+
     // Grand Master
     xmlWriter.writeStartElement("GrandMaster");
     xmlWriter.writeAttribute("ChannelMode", "All");
@@ -148,6 +168,9 @@ void VCProperties_Test::loadXMLHappy()
     VCProperties p;
     QVERIFY(p.loadXML(xmlReader) == true);
     QCOMPARE(p.size(), QSize(10, 20));
+    QCOMPARE(p.gridSize(), QSize(15, 25));
+    QCOMPARE(p.gridVisible(), false);
+    QCOMPARE(p.gridSnap(), true);
     QCOMPARE(p.grandMasterChannelMode(), GrandMaster::AllChannels);
     QCOMPARE(p.grandMasterValueMode(), GrandMaster::Limit);
     QCOMPARE(p.grandMasterInputUniverse(), quint32(2));
@@ -258,6 +281,9 @@ void VCProperties_Test::saveXML()
 {
     VCProperties p;
     p.m_size = QSize(33, 44);
+    p.m_gridSize = QSize(7, 9);
+    p.m_gridVisible = false;
+    p.m_gridSnap = false;
     p.m_gmChannelMode = GrandMaster::AllChannels;
     p.m_gmValueMode = GrandMaster::Limit;
     p.m_gmInputUniverse = 3;
@@ -279,6 +305,9 @@ void VCProperties_Test::saveXML()
     VCProperties p2;
     QVERIFY(p2.loadXML(xmlReader) == true);
     QCOMPARE(p2.size(), QSize(33, 44));
+    QCOMPARE(p2.gridSize(), QSize(7, 9));
+    QCOMPARE(p2.gridVisible(), false);
+    QCOMPARE(p2.gridSnap(), false);
     QCOMPARE(p2.grandMasterChannelMode(), GrandMaster::AllChannels);
     QCOMPARE(p2.grandMasterValueMode(), GrandMaster::Limit);
     QCOMPARE(p2.grandMasterInputUniverse(), quint32(3));

@@ -71,7 +71,7 @@ void VCButton_Test::initial()
     QCOMPARE(btn.objectName(), QString("VCButton"));
     QCOMPARE(btn.frameStyle(), (int) KVCFrameStyleNone);
     QCOMPARE(btn.caption(), QString());
-    QCOMPARE(btn.size(), QSize(50, 50));
+    QCOMPARE(btn.size(), QSize(40, 40));
     QCOMPARE(btn.function(), Function::invalidId());
     QCOMPARE(btn.startupIntensity(), qreal(1.0));
     QCOMPARE(btn.isStartupIntensityEnabled(), false);

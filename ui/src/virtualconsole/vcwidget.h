@@ -613,6 +613,11 @@ public:
     /** Move this widget to the given point */
     virtual void move(const QPoint& point);
 
+    /** Check whether this widget should snap to the grid while moving/resizing.
+     *  By default every widget snaps, except containers that must not be
+     *  constrained (e.g. the Virtual Console bottom frame). */
+    virtual bool canSnapToGrid() const;
+
     /** Get the point where the mouse was clicked last in this widget */
     QPoint lastClickPoint() const;
 

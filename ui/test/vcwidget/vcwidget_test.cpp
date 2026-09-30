@@ -337,6 +337,11 @@ void VCWidget_Test::copy()
 {
     QWidget w;
 
+    /* Neutralize grid snapping so this test can use arbitrary geometry */
+    VCProperties prop = VirtualConsole::instance()->properties();
+    prop.setGridSize(QSize(1, 1));
+    VirtualConsole::instance()->m_properties = prop;
+
     StubWidget stub(&w, m_doc);
     stub.setCaption("Pertti Pasanen");
     stub.setBackgroundColor(QColor(Qt::red));
@@ -695,6 +700,11 @@ void VCWidget_Test::saveWindowState()
 {
     QWidget w;
 
+    /* Neutralize grid snapping so this test can use arbitrary geometry */
+    VCProperties prop = VirtualConsole::instance()->properties();
+    prop.setGridSize(QSize(1, 1));
+    VirtualConsole::instance()->m_properties = prop;
+
     StubWidget stub(&w, m_doc);
     w.show();
     w.resize(QSize(100, 100));
@@ -822,22 +832,23 @@ void VCWidget_Test::resize()
     stub.show();
     parent.resize(QSize(200, 200));
 
-    VCProperties prop = VirtualConsole::instance()->properties();
-    VirtualConsole::instance()->m_properties = prop;
-
+    /* Default grid is 20x20 */
     stub.resize(QSize(25, 25));
-    QCOMPARE(stub.size(), QSize(25, 25));
+    QCOMPARE(stub.size(), QSize(20, 20));
 
     stub.resize(QSize(26, 26));
-    QCOMPARE(stub.size(), QSize(25, 25));
+    QCOMPARE(stub.size(), QSize(20, 20));
 
     stub.resize(QSize(31, 30));
-    QCOMPARE(stub.size(), QSize(30, 30));
+    QCOMPARE(stub.size(), QSize(20, 20));
 
     // Allow resizing beyond parent's area
     stub.resize(QSize(250, 250));
-    QCOMPARE(stub.size(), QSize(250, 250));
+    QCOMPARE(stub.size(), QSize(240, 240));
 
+    /* Configurable grid: 5x5 */
+    VCProperties prop = VirtualConsole::instance()->properties();
+    prop.setGridSize(QSize(5, 5));
     VirtualConsole::instance()->m_properties = prop;
 
     stub.resize(QSize(25, 25));
@@ -852,6 +863,14 @@ void VCWidget_Test::resize()
     // Allow resizing beyond parent's area
     stub.resize(QSize(251, 252));
     QCOMPARE(stub.size(), QSize(250, 250));
+
+    /* Snap disabled: sizes are kept as-is */
+    prop = VirtualConsole::instance()->properties();
+    prop.setGridSnap(false);
+    VirtualConsole::instance()->m_properties = prop;
+
+    stub.resize(QSize(33, 37));
+    QCOMPARE(stub.size(), QSize(33, 37));
 }
 
 void VCWidget_Test::move()
@@ -862,21 +881,27 @@ void VCWidget_Test::move()
     parent.show();
     stub.show();
     parent.resize(QSize(200, 200));
-    stub.resize(QSize(50, 50));
 
-    VCProperties prop = VirtualConsole::instance()->properties();
-    VirtualConsole::instance()->m_properties = prop;
+    /* Default grid is 20x20 */
+    stub.resize(QSize(50, 50));
+    QCOMPARE(stub.size(), QSize(40, 40));
 
     stub.move(QPoint(25, 25));
-    QCOMPARE(stub.geometry(), QRect(25, 25, 50, 50));
+    QCOMPARE(stub.geometry(), QRect(20, 20, 40, 40));
 
     stub.move(QPoint(-5, -5));
-    QCOMPARE(stub.geometry(), QRect(0, 0, 50, 50));
+    QCOMPARE(stub.geometry(), QRect(0, 0, 40, 40));
 
     stub.move(QPoint(190, 190));
-    QCOMPARE(stub.geometry(), QRect(150, 150, 50, 50));
+    QCOMPARE(stub.geometry(), QRect(160, 160, 40, 40));
 
+    /* Configurable grid: 5x5 */
+    VCProperties prop = VirtualConsole::instance()->properties();
+    prop.setGridSize(QSize(5, 5));
     VirtualConsole::instance()->m_properties = prop;
+
+    stub.resize(QSize(50, 50));
+    QCOMPARE(stub.size(), QSize(50, 50));
 
     stub.move(QPoint(25, 25));
     QCOMPARE(stub.geometry(), QRect(25, 25, 50, 50));
@@ -889,6 +914,14 @@ void VCWidget_Test::move()
 
     stub.move(QPoint(31, 31));
     QCOMPARE(stub.geometry(), QRect(30, 30, 50, 50));
+
+    /* Snap disabled: positions are kept as-is */
+    prop = VirtualConsole::instance()->properties();
+    prop.setGridSnap(false);
+    VirtualConsole::instance()->m_properties = prop;
+
+    stub.move(QPoint(33, 33));
+    QCOMPARE(stub.geometry(), QRect(33, 33, 50, 50));
 }
 
 void VCWidget_Test::paint()
@@ -929,6 +962,11 @@ void VCWidget_Test::mousePress()
 
     VirtualConsole* vc = VirtualConsole::instance();
     QVERIFY(vc != NULL);
+
+    /* Neutralize grid snapping so this test can use arbitrary geometry */
+    VCProperties prop = vc->properties();
+    prop.setGridSize(QSize(1, 1));
+    vc->m_properties = prop;
 
     vc->show();
 

@@ -26,6 +26,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QPainter>
+#include <QPen>
 #include <QAction>
 #include <QStyle>
 #include <QDebug>
@@ -104,6 +105,13 @@ VCFrame::~VCFrame()
 bool VCFrame::isBottomFrame() const
 {
     return (parentWidget() != NULL && qobject_cast<VCFrame*>(parentWidget()) == NULL);
+}
+
+bool VCFrame::canSnapToGrid() const
+{
+    /* The bottom frame is the Virtual Console workspace. Its size must match
+       the configured Virtual Console size exactly, so don't snap it. */
+    return isBottomFrame() == false;
 }
 
 void VCFrame::setDisableState(bool disable)
@@ -1515,4 +1523,34 @@ void VCFrame::mouseMoveEvent(QMouseEvent* e)
         m_width = this->width();
         m_height = this->height();
     }
+}
+
+void VCFrame::paintEvent(QPaintEvent* e)
+{
+    /* Draw the Virtual Console workspace grid.
+       Only the bottom frame (the workspace) draws it, and only in Design mode. */
+    VirtualConsole* vc = VirtualConsole::instance();
+    if (vc != NULL && isBottomFrame() == true && mode() == Doc::Design)
+    {
+        VCProperties props = vc->properties();
+        if (props.gridVisible() == true)
+        {
+            QSize grid = props.gridSize();
+            int gx = grid.width() > 0 ? grid.width() : 1;
+            int gy = grid.height() > 0 ? grid.height() : 1;
+
+            QPainter painter(this);
+            QPen pen(QColor(0, 0, 0, 30));
+            pen.setWidth(1);
+            painter.setPen(pen);
+
+            for (int x = gx; x < width(); x += gx)
+                painter.drawLine(x, 0, x, height());
+
+            for (int y = gy; y < height(); y += gy)
+                painter.drawLine(0, y, width(), y);
+        }
+    }
+
+    VCWidget::paintEvent(e);
 }

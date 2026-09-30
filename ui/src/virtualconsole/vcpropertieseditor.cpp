@@ -57,6 +57,21 @@ VCPropertiesEditor::VCPropertiesEditor(QWidget* parent, const VCProperties& prop
     m_sizeXSpin->setValue(properties.size().width());
     m_sizeYSpin->setValue(properties.size().height());
 
+    /* Grid */
+    int gridCell = properties.gridSize().width();
+    if (gridCell < 1)
+        gridCell = VC_GRID_DEFAULT_SIZE;
+    m_gridSpin->setValue(gridCell);
+    m_gridVisibleCheck->setChecked(properties.gridVisible());
+    m_gridSnapCheck->setChecked(properties.gridSnap());
+
+    connect(m_gridSpin, SIGNAL(valueChanged(int)),
+            this, SLOT(slotGridSizeChanged(int)));
+    connect(m_gridVisibleCheck, SIGNAL(toggled(bool)),
+            this, SLOT(slotGridVisibleToggled(bool)));
+    connect(m_gridSnapCheck, SIGNAL(toggled(bool)),
+            this, SLOT(slotGridSnapToggled(bool)));
+
     /* Widgets page */
     QSettings settings;
     // ********************* BUTTON ****************************
@@ -319,6 +334,26 @@ void VCPropertiesEditor::slotSizeYChanged(int value)
     QSize sz(m_properties.size());
     sz.setHeight(value);
     m_properties.setSize(sz);
+}
+
+/*****************************************************************************
+ * Grid
+ *****************************************************************************/
+
+void VCPropertiesEditor::slotGridSizeChanged(int value)
+{
+    /* The Virtual Console grid is square: one value for both axes */
+    m_properties.setGridSize(QSize(value, value));
+}
+
+void VCPropertiesEditor::slotGridVisibleToggled(bool checked)
+{
+    m_properties.setGridVisible(checked);
+}
+
+void VCPropertiesEditor::slotGridSnapToggled(bool checked)
+{
+    m_properties.setGridSnap(checked);
 }
 
 void VCPropertiesEditor::slotSpeedDialConfirmed()
