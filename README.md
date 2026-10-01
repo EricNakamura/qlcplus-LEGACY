@@ -5,101 +5,158 @@
 </p>
 
 <h1 align="center">Q Light Controller+</h1>
-<p align="center"><em>(Often abbreviated as "QLC+")</em></p>
+<p align="center"><em>Fork LEGACY (QLC+ 4 · QtWidgets)</em></p>
 <p align="center">
-  <strong>Open-source lighting control for DMX, Art-Net, sACN and more.</strong><br/>
-  Designed for live shows, theatre, architectural installations, and venues.
+  <strong>Controle de iluminação open-source para DMX, Art-Net, sACN e muito mais.</strong><br/>
+  Esta fork adiciona um motor de efeitos RGB em LuaJIT e melhorias de fluxo ao vivo.
 </p>
 
 <p align="center">
-  <a href="https://github.com/mcallegari/qlcplus/releases/latest">
-    <img src="https://img.shields.io/github/v/release/mcallegari/qlcplus" alt="Latest release version badge" /></a>
-  <a href="https://github.com/mcallegari/qlcplus/releases/latest">
-    <img src="https://img.shields.io/github/release-date/mcallegari/qlcplus" alt="Release date badge" /></a>
-  <a href="https://github.com/mcallegari/qlcplus/commits/master/">
-    <img src="https://img.shields.io/github/commits-since/mcallegari/qlcplus/latest/master" alt="Commits since latest release badge" /></a>
-  <a href="https://github.com/mcallegari/qlcplus/commits/master/">
-    <img src="https://img.shields.io/github/commit-activity/w/mcallegari/qlcplus" alt="Weekly commit activity badge" /></a>
-  <a href="https://github.com/mcallegari/qlcplus/actions">
-    <img src="https://github.com/mcallegari/qlcplus/actions/workflows/build.yml/badge.svg" alt="Build status badge" /></a>
-  <a href="https://coveralls.io/github/mcallegari/qlcplus?branch=master">
-    <img src="https://coveralls.io/repos/github/mcallegari/qlcplus/badge.svg?branch=master" alt="Test coverage badge" /></a>
+  <img src="https://img.shields.io/badge/version-4.14.5%20GIT-blue" alt="Versão da fork" />
+  <img src="https://img.shields.io/badge/based%20on-mcallegari%2Fqlcplus-lightgrey" alt="Baseado no QLC+ upstream" />
+  <img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="Licença Apache 2.0" />
+  <img src="https://img.shields.io/badge/LuaJIT-enabled-00007C" alt="Motor RGB em LuaJIT" />
+  <img src="https://img.shields.io/badge/Qt-6%20%7C%205-41CD52" alt="Qt 5 e 6" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/EricNakamura/qlcplus-LEGACY">
+    <img src="https://img.shields.io/badge/github-EricNakamura%2Fqlcplus--LEGACY-181717?logo=github" alt="Repositório da fork" /></a>
 </p>
 
 ---
 
+## Sobre esta fork
+
+Esta é uma **fork pessoal** do [Q Light Controller Plus](https://github.com/mcallegari/qlcplus),
+mantida em [EricNakamura/qlcplus-LEGACY](https://github.com/EricNakamura/qlcplus-LEGACY).
+
+Ela parte do branch **QLC+ 4** (interface QtWidgets, branch `master`) e adiciona
+recursos próprios focados em **desempenho dos efeitos** e no **uso ao vivo**.
+A versão atual é **`4.14.5 GIT`**.
+
+> O QLC+ original continua sendo a base e a referência. Para documentação geral
+> de uso, consulte <https://docs.qlcplus.org/>. Esta fork **não** tem vínculo
+> oficial com o projeto upstream.
+
+## Recursos exclusivos da fork
+
+| Recurso | Descrição |
+|---|---|
+| **Motor RGB em LuaJIT** | Efeitos da RGB Matrix são scripts `.lua` executados em LuaJIT, no lugar do motor JavaScript original. Muito mais rápido para matrizes grandes. Veja o [guia](docs/RGB-SCRIPTS-LUA.md). |
+| **Engine RGB a 50 Hz com fase contínua** | O RGB Matrix avança a fase do efeito a cada tick (50 Hz) com multiplicador de velocidade, permitindo animações suaves e velocidade configurável em tempo real. |
+| **Slider de transição global** | Slider opcional no Virtual Console que aplica um tempo de transição global a funções que não estão em flash. |
+| **Monitor sempre no topo** | A janela do Monitor DMX pode ser fixada acima das demais janelas. |
+| **Grade do Virtual Console configurável** | Tamanho e visibilidade da grade do Virtual Console ajustáveis. |
+| **Fade-out no RGBMatrix** | Capacidade de fade-out restaurada para o RGBMatrix. |
+| **Correções de bugs conhecidos** | Diversas correções de estabilidade e de comportamento em relação ao upstream. |
+| **Auto-configuração Easy ArtNet** | O plug-in Art-Net reconhece e configura automaticamente (unicast) os dispositivos [Easy ArtNet Interface](https://github.com/EricNakamura/easy-artnet-interface). |
+| **Build macOS modernizado** | Presets do CMake + `build.sh`, usando Qt 6 (Homebrew), Ninja e ccache. |
+
+## Documentação
+
+- **[Guia dos scripts RGB em Lua (LuaJIT)](docs/RGB-SCRIPTS-LUA.md)** — como criar,
+  registrar, entender a fase contínua e depurar seus efeitos.
+- Documentação oficial do QLC+: <https://docs.qlcplus.org/>
+- Wiki (compilação e plataformas): <https://github.com/mcallegari/qlcplus/wiki>
+- Convenções para agentes/contribuidores: [AGENTS.md](AGENTS.md)
+
+### Protocolos suportados
+
+MIDI, OSC, HID, DMX USB, Art-Net, E1.31 (sACN), OS2L e outros. Consulte a
+[documentação de plug-ins](https://docs.qlcplus.org/v4/plugins).
+
+### Projetos relacionados
+
+- **[Easy ArtNet Interface](https://github.com/EricNakamura/easy-artnet-interface)** —
+  interface Art-Net que esta fork reconhece e configura automaticamente
+  (conexão unicast).
+
+## Compilando (macOS / Qt 6)
+
+**Dependências** (via [Homebrew](https://brew.sh/)): Qt 6, **LuaJIT**
+(dependência obrigatória nesta fork), Ninja, ccache e CMake ≥ 3.25.
+
+```bash
+brew install qt ninja ccache luajit
+```
+
+> O código também suporta **Qt 5**, mas o fluxo abaixo assume Qt 6 do Homebrew.
+
+**Nunca compile in-source** — o CMake falha de propósito. Use o helper ou os
+presets:
+
+```bash
+# Build de Debug (testes + editor de fixtures) em ./build
+./build.sh debug
+
+# Outras opções: fast (sem testes/editor), release, package
+./build.sh fast
+./build.sh release
+./build.sh package     # gera o bundle macOS (rode o install depois)
+```
+
+Ou manualmente, com os presets do CMake:
+
+```bash
+cmake --workflow --preset macos-debug
+ninja -C build run      # executa o QLC+
+```
+
+### Testes
+
+Os testes precisam dos recursos copiados para o diretório de build; rode sempre
+pelo wrapper:
+
+```bash
+./unittest.sh ui        # QLC+ 4 (a interface padrão desta fork)
+ninja -C build check    # equivalente
+```
+
+## Estrutura do repositório
+
+| Diretório | Finalidade |
+|---|---|
+| `engine/` | Biblioteca central `qlcplusengine` (sem UI): `Doc`, `Fixture`, `Function`/`Scene`/`Chaser`/`EFX`/`RGBMatrix`, `MasterTimer`, `InputOutputMap`, `Universe`. |
+| `engine/audio/` | Subsistema de áudio e plug-ins de decodificação. |
+| `ui/` | Interface QtWidget do QLC+ 4 (`libqlcplusui`): `App`, `VirtualConsole`/`VCWidget`, `SimpleDesk`, gerentes. |
+| `main/` | Ponto de entrada do executável do QLC+ 4. |
+| `qmlui/` | Interface QML do QLC+ 5 (somente com `-Dqmlui=ON`). |
+| `fixtureeditor/` | Editor de definições de fixture autônomo. |
+| `plugins/` | Plug-ins de E/S e `plugins/interfaces/` (o contrato `QLCIOPlugin`). |
+| `webaccess/` | Servidor HTTP embutido e interface web. |
+| `hotplugmonitor/` | Detecção de hotplug de dispositivos multiplataforma. |
+| `resources/` | Fixtures, gobos, perfis de entrada, scripts RGB, ícones, esquemas. |
+| `platforms/` | Empacotamento por plataforma (`linux/`, `macos/`, `windows/`, `android/`, `ios/`). |
+
+## Contribuindo
+
+- Leia o [CONTRIBUTING.md](CONTRIBUTING.md) antes de enviar mudanças — em
+  especial, mudanças no **engine** e em `VCWidget` devem ser discutidas antes.
+- Suporte e canais de ajuda: [SUPPORT.md](SUPPORT.md).
+- Este é um fork pessoal: contribuições ao QLC+ original devem ir para
+  <https://github.com/mcallegari/qlcplus>.
+
+## Licença
+
+Licenciado sob a **Apache License 2.0**. Veja [COPYING](COPYING) para os detalhes.
+
+Os avisos de copyright originais são preservados nos cabeçalhos de cada arquivo
+e nos créditos abaixo.
+
+---
+
+## Créditos
+
+A fork mantém integralmente os créditos do projeto upstream.
+
 <p align="center">
-  <a href="https://www.qlcplus.org/download">
-    <img src="https://custom-icon-badges.demolab.com/badge/-Download_QLC+-blue?style=for-the-badge&logo=download&logoColor=white" alt="Download QLC+ badge" /></a>
-  <a href="https://qlcplus.org/discover/raspberry-pi">
-    <img src="https://custom-icon-badges.demolab.com/badge/-Raspberry_Pi-red?style=for-the-badge&logo=cpu&logoColor=white" alt="Raspberry Pi badge" /></a>
-  <a href="https://merch.qlcplus.org">
-    <img src="https://custom-icon-badges.demolab.com/badge/-Store-green?style=for-the-badge&logo=home&logoColor=white" alt="Official store badge" /></a>
+Copyright © Heikki Junnila, Massimo Callegari
 </p>
-
-## Introduction
-
-**QLC+** is powerful and user-friendly software to control lighting. QLC+ supports a [huge amount of hardware,](https://qlcplus.org/discover/compatibility) runs on Linux, Windows (10+), macOS (10.12+), and Raspberry Pi. Whether you're an experienced lighting professional or just getting started, QLC+ empowers you to take control of your lighting fixtures with ease. The primary goal of this project is to bring QLC+ to the level of available commercial software.
-
-### Supported protocols
-
-[![MIDI](https://img.shields.io/badge/MIDI-%23323330.svg?style=for-the-badge&logo=midi&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/midi)
-[![OSC](https://img.shields.io/badge/OSC-%23323330.svg?style=for-the-badge&logo=aiohttp&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/osc)
-[![HID](https://img.shields.io/badge/HID-%23323330.svg?style=for-the-badge&logo=applearcade&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/hid)
-[![DMX](https://img.shields.io/badge/DMX-%23323330.svg?style=for-the-badge&logo=amazonec2&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/dmx-usb)
-[![ArtNet](https://img.shields.io/badge/ArtNet-%23323330.svg?style=for-the-badge&logo=aiohttp&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/art-net)
-[![E1.31/S.ACN](https://img.shields.io/badge/E1.31%20S.ACN-%23323330.svg?style=for-the-badge&logo=aiohttp&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/e1-31-sacn)
-[![OS2L](https://img.shields.io/badge/OS2L-%23323330.svg?style=for-the-badge&logo=aiohttp&logoColor=%23F7DF1E)](https://docs.qlcplus.org/v4/plugins/os2l)
-
-### QLC+ on social media
-
-[![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?style=flat-square&logo=Instagram)](https://www.instagram.com/qlcplus/) 
-[![YouTube (v4)](https://img.shields.io/badge/YouTube%20(v4)-%23FF0000.svg?style=flat-square&logo=YouTube)](https://www.youtube.com/playlist?list=PLHT-wIriuitDiW4A9oKSDr__Z_jcmMVdi) 
-[![YouTube (v5)](https://img.shields.io/badge/YouTube%20(v5)-%23FF0000.svg?style=flat-square&logo=YouTube)](https://www.youtube.com/playlist?list=PLHT-wIriuitBQo0DKX9YgWVmS6LsEErE_) 
-[![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?style=flat-square&logo=Facebook)](https://www.facebook.com/qlcplus)
-
-## Support & bug reports
-
-We have a dedicated page to help you find support, please check out [SUPPORT.md](SUPPORT.md). To learn about a specific feature of QLC+, take a look at the [official documentation](https://docs.qlcplus.org/). To give feedback, submit new fixtures and get new ideas, go to the [forum](https://www.qlcplus.org/forum/index.php)
-
-### Help wanted
-Click the badge below to see the currently confirmed issues with QLC+. Perhaps you can find a solution?
-
-[![Help Wanted](https://img.shields.io/github/issues/mcallegari/qlcplus/issue%20confirmed?logo=github&color=red)](https://github.com/mcallegari/qlcplus/issues?q=is%3Aopen+is%3Aissue+label%3A%22issue+confirmed%22)
-
-
-## Building QLC+
-
-Compilation guides and platform-specific instructions are available in our [GitHub Wiki](https://github.com/mcallegari/qlcplus/wiki).
-
-#### Developers at work
-
-If you're regularly updating QLC+ sources with git pull, you may encounter compiler warnings, errors, or unresolved symbols. We strive to keep the `master` branch free of critical errors; however, dependencies between objects can sometimes cause issues, requiring a full package recompilation rather than just updating recent changes.
-
-## Contributing
-### Software development
-
-We welcome contributions from the community to help make QLC+ even better. If you're working on something major, start a thread in the [Development Forum](https://www.qlcplus.org/forum/viewforum.php?f=12) first. Make sure you read the [CONTRIBUTING.md](CONTRIBUTING.md) document for more.
-
-### Financially
-
-If you're reading this we already appreciate you. If you're just getting started with lighting you have absolutely no obligation to give us money. When QLC+ opens up revenue opportunities for you, we'd be very thankful for your support. GitHub sponsors is the preferred option.
-
-<img src="https://img.shields.io/github/sponsors/mcallegari" alt="GitHub Sponsors"> <a href="https://github.com/sponsors/mcallegari"><img src="https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors&logoColor=#white" /></a>
-
-If you're interested, QLC+ also has an [official store](https://qlcplus-merch.myshopify.com) where you can purchase [clothing](https://qlcplus-merch.myshopify.com/collections/clothing), [themes](https://qlcplus-merch.myshopify.com/collections/themes), the [Raspberry Pi image](https://qlcplus-merch.myshopify.com/products/qlc-raspberry-pi-image) or [one-on-one consultation](https://qlcplus-merch.myshopify.com/collections/training-and-support) with an expert. 
-
-
-
-## Thank you!
-
-QLC+ owes its success to the dedication and expertise of numerous individuals who have generously contributed their time and skills. The following list recognizes those whose remarkable contributions have played a pivotal role in building QLC+.
-
-![GitHub contributors](https://img.shields.io/github/contributors/mcallegari/qlcplus)
 
 <details>
 <summary>QLC+ 5</summary>
-    
+
 *   Eric Arnebäck (3D preview features)
 *   Santiago Benejam Torres (Catalan translation)
 *   Luis García Tornel (Spanish translation)
@@ -158,26 +215,8 @@ QLC+ owes its success to the dedication and expertise of numerous individuals wh
 ---
 
 <p align="center">
-<a href="https://github.com/mcallegari/qlcplus/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mcallegari/qlcplus" />
-</a>
-</p>
-
----
-
-
-## License
-<a href="https://github.com/mcallegari/qlcplus/blob/master/COPYING">
-  <img alt="GitHub License badge" src="https://img.shields.io/github/license/mcallegari/qlcplus?style=flat-square" />
-</a>
-
-Licensed under the **Apache 2.0** License.  See [COPYING](COPYING) for details.
-
----
-<p align="center">Copyright © Heikki Junnila, Massimo Callegari</p>
-<p align="center">
   <img src="https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white" alt="C++ badge" />
   <img src="https://img.shields.io/badge/Qt-%23217346.svg?style=for-the-badge&logo=Qt&logoColor=white" alt="Qt badge" />
   <img src="https://img.shields.io/badge/CMake-%23008FBA.svg?style=for-the-badge&logo=cmake&logoColor=white" alt="CMake badge" />
-  <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" alt="JavaScript badge" />
+  <img src="https://img.shields.io/badge/LuaJIT-%2300007C.svg?style=for-the-badge&logo=lua&logoColor=white" alt="LuaJIT badge" />
 </p>
