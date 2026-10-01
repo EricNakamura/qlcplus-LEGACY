@@ -91,4 +91,6 @@ end
 ## Reference scripts
 
 - `resources/rgbscripts/sine.lua` — continuous-phase sine wave with `list` + `range` properties. **Use this as the reference.**
-- `resources/rgbscripts/test_script.lua` — **misleading**: treats `step` as an integer index, which no longer matches the engine. Do not copy its step handling.
+- `resources/rgbscripts/test_script.lua` — continuous-phase sweep with a fading tail.
+
+For the full human-facing guide, see [`docs/RGB-SCRIPTS-LUA.md`](../../../docs/RGB-SCRIPTS-LUA.md).

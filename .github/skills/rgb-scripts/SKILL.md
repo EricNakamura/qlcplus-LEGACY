@@ -94,8 +94,10 @@ The editor preview path (`RGBMatrix::previewMap()` → `RGBAlgorithm::rgbMap()`)
 
 ### Reference scripts
 
-- `resources/rgbscripts/sine.lua` — the correct reference: uses `step` as a continuous phase.
-- `resources/rgbscripts/test_script.lua` — **misleading**: it treats `step` as an integer index (`(x - 1) == step`), which no longer matches the engine and will not animate. Do not copy its step handling.
+- `resources/rgbscripts/sine.lua` — continuous-phase sine wave (`list` + `range` properties).
+- `resources/rgbscripts/test_script.lua` — continuous-phase sweep with a fading tail.
+
+For the full human-facing guide, see [`docs/RGB-SCRIPTS-LUA.md`](../../../docs/RGB-SCRIPTS-LUA.md).
 
 ## Porting a legacy `.js` script
 
