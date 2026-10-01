@@ -496,18 +496,24 @@ void FixtureRemap::slotCloneSourceFixture()
     if (srcFix == NULL)
         return; // popup here ?
 
+    QStringList overlapping;
     quint32 srcAddr = srcFix->universeAddress();
     for (quint32 i = srcAddr; i < srcAddr + srcFix->channels(); i++)
     {
-        quint32 fxCheck = m_targetDoc->fixtureForAddress(i);
-        if (fxCheck != Fixture::invalidId())
+        foreach (quint32 fid, m_targetDoc->fixturesAtAddress(i))
         {
-            QMessageBox::warning(this,
-                                 tr("Invalid operation"),
-                                 tr("You are trying to clone a fixture on an address already in use. "
-                                    "Please fix the target list first."));
-            return;
+            Fixture* fxi = m_targetDoc->fixture(fid);
+            if (fxi != NULL && overlapping.contains(fxi->name()) == false)
+                overlapping << fxi->name();
         }
+    }
+
+    if (overlapping.isEmpty() == false)
+    {
+        QMessageBox::warning(this,
+                             tr("Address overlap"),
+                             tr("The fixture will be cloned on an address already used by %1.\n"
+                                "The patch will overlap.").arg(overlapping.join(", ")));
     }
 
     // create a copy of the fixture and add it to the target document

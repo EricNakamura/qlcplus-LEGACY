@@ -205,22 +205,33 @@ void Doc_Test::addFixture()
 
     m_doc->resetModified();
 
-    /* Add again a completely new fixture, with automatic ID assignment */
+    /* Add again a completely new fixture, with automatic ID assignment.
+       Fixtures are allowed to share the same DMX address space (overlap) */
     Fixture* f3 = new Fixture(m_doc);
     f3->setName("Three");
     f3->setChannels(5);
     f3->setAddress(f2->address());
     f3->setUniverse(0);
-    QVERIFY(m_doc->addFixture(f3) == false); // cannot assign the same address as f2
-    f3->setAddress(m_currentAddr);
     QVERIFY(m_doc->addFixture(f3) == true);
-    m_currentAddr += f3->channels();
     QVERIFY(f1->id() == 0);
     QVERIFY(f2->id() == 1);
     QVERIFY(f3->id() == 2);
     QVERIFY(m_doc->isModified() == true);
     QVERIFY(spy.size() == 3);
     QVERIFY(spy.at(2).at(0) == f3->id());
+
+    /* The address is now shared by both fixtures, with f2 as primary */
+    QVERIFY(m_doc->isAddressFree(f2->universeAddress()) == false);
+    QVERIFY(m_doc->fixturesAtAddress(f2->universeAddress()).count() == 2);
+    QVERIFY(m_doc->fixtureForAddress(f2->universeAddress()) == f2->id());
+
+    /* Move f3 to a free address */
+    m_doc->resetModified();
+    f3->setAddress(m_currentAddr);
+    m_currentAddr += f3->channels();
+    QVERIFY(m_doc->isModified() == true);
+    QVERIFY(m_doc->fixturesAtAddress(f2->universeAddress()).count() == 1);
+    QVERIFY(m_doc->fixtureForAddress(f2->universeAddress()) == f2->id());
 }
 
 void Doc_Test::deleteFixture()
@@ -313,6 +324,51 @@ void Doc_Test::deleteFixture()
     QVERIFY(spy.size() == 3);
     QVERIFY(spy.at(2).at(0) == id);
     QVERIFY(f3ptr == NULL);
+}
+
+void Doc_Test::overlappingAddresses()
+{
+    /* Two fixtures sharing the same address space are allowed */
+    Fixture* f1 = new Fixture(m_doc);
+    f1->setName("Primary");
+    f1->setChannels(3);
+    f1->setAddress(0);
+    f1->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f1) == true);
+
+    Fixture* f2 = new Fixture(m_doc);
+    f2->setName("Secondary");
+    f2->setChannels(3);
+    f2->setAddress(0);
+    f2->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f2) == true);
+
+    /* Both fixtures occupy the address, the first added is the primary */
+    QVERIFY(m_doc->isAddressFree(0) == false);
+    QCOMPARE(m_doc->fixturesAtAddress(0), QList <quint32> () << f1->id() << f2->id());
+    QCOMPARE(m_doc->fixtureForAddress(0), f1->id());
+    QVERIFY(m_doc->isAddressFree(3) == true);
+
+    /* Partial overlap: the second fixture extends beyond the first one */
+    f2->setAddress(1);
+    QCOMPARE(m_doc->fixturesAtAddress(0), QList <quint32> () << f1->id());
+    QCOMPARE(m_doc->fixturesAtAddress(1), QList <quint32> () << f1->id() << f2->id());
+    QCOMPARE(m_doc->fixturesAtAddress(2), QList <quint32> () << f1->id() << f2->id());
+    QCOMPARE(m_doc->fixturesAtAddress(3), QList <quint32> () << f2->id());
+
+    /* Removing the primary hands the address over to the secondary */
+    quint32 primaryId = f1->id();
+    QVERIFY(m_doc->deleteFixture(primaryId) == true);
+    QCOMPARE(m_doc->fixturesAtAddress(1), QList <quint32> () << f2->id());
+    QCOMPARE(m_doc->fixtureForAddress(1), f2->id());
+    QVERIFY(m_doc->isAddressFree(0) == true);
+
+    /* Moving the last owner away frees its addresses */
+    f2->setAddress(100);
+    QVERIFY(m_doc->isAddressFree(1) == true);
+    QVERIFY(m_doc->isAddressFree(2) == true);
+    QVERIFY(m_doc->isAddressFree(3) == true);
+    QCOMPARE(m_doc->fixturesAtAddress(100), QList <quint32> () << f2->id());
 }
 
 void Doc_Test::replaceFixtures()

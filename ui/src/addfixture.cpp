@@ -622,17 +622,33 @@ void AddFixture::slotDiptoolButtonClicked() {
 }
 
 void AddFixture::checkOverlapping() {
+  /* Overlapping addresses are allowed: warn the user, but don't block the
+     patch. The first added fixture stays the primary one on shared channels */
+  QStringList overlapping;
+
   for (int i = 0; i < m_amountValue; ++i) {
     int address = m_addressValue + i * (m_gapValue + m_channelsValue);
     int absAddress = (address & 0x01FF) | (m_universeValue << 9);
-    if (checkAddressAvailability(absAddress, m_channelsValue) == false) {
-      // Show overlapping error
-      m_addrErrorLabel->show();
-      m_invalidAddressFlag = true;
-      return;
+
+    for (int c = 0; c < m_channelsValue; c++) {
+      foreach (quint32 fid, m_doc->fixturesAtAddress(absAddress + c)) {
+        if (fid == m_fixtureID)
+          continue;
+
+        Fixture* fxi = m_doc->fixture(fid);
+        if (fxi != NULL && overlapping.contains(fxi->name()) == false)
+          overlapping << fxi->name();
+      }
     }
   }
 
-  m_addrErrorLabel->hide();
+  if (overlapping.isEmpty() == true) {
+    m_addrErrorLabel->hide();
+  } else {
+    m_addrErrorLabel->setText(QString("<html><head/><body><p><span style=\" color:#e09000;\">%1</span></p></body></html>")
+                              .arg(tr("WARNING: address already used by %1. The patch will overlap.").arg(overlapping.join(", "))));
+    m_addrErrorLabel->show();
+  }
+
   m_invalidAddressFlag = false;
 }

@@ -80,23 +80,43 @@ bool AddRGBPanel::checkAddressAvailability()
 {
     int uniAddr = m_doc->inputOutputMap()->getUniverseID(m_uniCombo->currentIndex());
     int startAddress = ((m_addressSpin->value() - 1) & 0x01FF) | (uniAddr << 9);
-    int channels = m_columnSpin->value() * m_rowSpin->value() * 3;
+
+    int dmxChannelsPerPixel = 3;
+    if (m_compCombo->currentIndex() == 6) // RGBW
+        dmxChannelsPerPixel = 4;
+
+    if (m_16bitCheck->isChecked())
+        dmxChannelsPerPixel *= 2;
+
+    int channels = m_columnSpin->value() * m_rowSpin->value() * dmxChannelsPerPixel;
     QPushButton *okBtn = buttonBox->button(QDialogButtonBox::Ok);
 
     qDebug() << "Check availability for address: " << startAddress;
 
+    /* Overlapping addresses are allowed: warn the user, but don't block */
+    QStringList overlapping;
     for (int i = 0; i < channels; i++)
     {
-        quint32 fid = m_doc->fixtureForAddress(startAddress + i);
-        if (fid != Fixture::invalidId())
+        foreach (quint32 fid, m_doc->fixturesAtAddress(startAddress + i))
         {
-            m_addrErrorLabel->show();
-            okBtn->setEnabled(false);
-            return false;
+            Fixture* fxi = m_doc->fixture(fid);
+            if (fxi != NULL && overlapping.contains(fxi->name()) == false)
+                overlapping << fxi->name();
         }
     }
-    m_addrErrorLabel->hide();
+
     okBtn->setEnabled(true);
+
+    if (overlapping.isEmpty() == true)
+    {
+        m_addrErrorLabel->hide();
+        return true;
+    }
+
+    m_addrErrorLabel->setText(QString("<html><head/><body><p><span style=\" color:#e09000;\">%1</span></p></body></html>")
+                              .arg(tr("WARNING: address already used by %1. The panel will overlap.").arg(overlapping.join(", "))));
+    m_addrErrorLabel->show();
+
     return true;
 }
 

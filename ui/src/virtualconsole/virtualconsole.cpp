@@ -61,6 +61,20 @@
 
 #define SETTINGS_VC_SIZE "virtualconsole/size"
 
+/** Snap $value down to a multiple of $grid (at least one grid cell).
+ *  Used when building matrices so their items line up with the grid. */
+static int snapValueToGrid(int value, int grid)
+{
+    if (grid < 1)
+        grid = 1;
+
+    int snapped = value - (value % grid);
+    if (snapped < grid)
+        snapped = grid;
+
+    return snapped;
+}
+
 VirtualConsole* VirtualConsole::s_instance = NULL;
 
 /****************************************************************************
@@ -777,7 +791,16 @@ void VirtualConsole::slotAddButtonMatrix()
 
     int h = abm.horizontalCount();
     int v = abm.verticalCount();
+
+    /* Make the matrix respect the Virtual Console grid */
+    QSize grid = m_properties.gridSize();
     int sz = abm.buttonSize();
+    int pad = 10;
+    if (m_properties.gridSnap() == true)
+    {
+        sz = snapValueToGrid(sz, grid.width());
+        pad = grid.width() > 0 ? grid.width() : 1;
+    }
 
     VCFrame* frame = NULL;
     if (abm.frameStyle() == AddVCButtonMatrix::NormalFrame)
@@ -790,7 +813,7 @@ void VirtualConsole::slotAddButtonMatrix()
     connectWidgetToParent(frame, parent);
 
     // Resize the parent frame to fit the buttons nicely and toggle resizing off
-    frame->resize(QSize((h * sz) + 20, (v * sz) + 20));
+    frame->resize(QSize((h * sz) + (pad * 2), (v * sz) + (pad * 2)));
     frame->setAllowResize(false);
 
     for (int y = 0; y < v; y++)
@@ -801,8 +824,8 @@ void VirtualConsole::slotAddButtonMatrix()
             Q_ASSERT(button != NULL);
             addWidgetInMap(button);
             connectWidgetToParent(button, frame);
-            button->move(QPoint(10 + (x * sz), 10 + (y * sz)));
             button->resize(QSize(sz, sz));
+            button->move(QPoint(pad + (x * sz), pad + (y * sz)));
             button->show();
 
             int index = (y * h) + x;
@@ -853,6 +876,18 @@ void VirtualConsole::slotAddSliderMatrix()
     int height = avsm.height();
     int count = avsm.amount();
 
+    /* Make the matrix respect the Virtual Console grid */
+    QSize grid = m_properties.gridSize();
+    int padX = 10;
+    int padY = 10;
+    if (m_properties.gridSnap() == true)
+    {
+        width = snapValueToGrid(width, grid.width());
+        height = snapValueToGrid(height, grid.height());
+        padX = grid.width() > 0 ? grid.width() : 1;
+        padY = grid.height() > 0 ? grid.height() : 1;
+    }
+
     VCFrame* frame = new VCFrame(parent, m_doc);
     Q_ASSERT(frame != NULL);
     addWidgetInMap(frame);
@@ -860,7 +895,7 @@ void VirtualConsole::slotAddSliderMatrix()
     connectWidgetToParent(frame, parent);
 
     // Resize the parent frame to fit the sliders nicely
-    frame->resize(QSize((count * width) + 20, height + 20));
+    frame->resize(QSize((count * width) + (padX * 2), height + (padY * 2)));
     frame->setAllowResize(false);
 
     for (int i = 0; i < count; i++)
@@ -869,8 +904,8 @@ void VirtualConsole::slotAddSliderMatrix()
         Q_ASSERT(slider != NULL);
         addWidgetInMap(slider);
         connectWidgetToParent(slider, frame);
-        slider->move(QPoint(10 + (width * i), 10));
         slider->resize(QSize(width, height));
+        slider->move(QPoint(padX + (width * i), padY));
         slider->show();
     }
 

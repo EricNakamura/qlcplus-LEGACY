@@ -21,6 +21,7 @@
 #define FIXTUREMANAGER_H
 
 #include <QWidget>
+#include <QList>
 
 #include "function.h"
 #include "fixture.h"
@@ -28,13 +29,22 @@
 
 class QLCFixtureDefCache;
 class FixtureGroupEditor;
+class FixturePatchModel;
 class FixtureTreeWidget;
+class PatchGridWidget;
+class QSortFilterProxyModel;
 class QTreeWidgetItem;
 class QTextBrowser;
+class QModelIndex;
 class QTreeWidget;
+class QTableView;
 class QTabWidget;
+class QToolButton;
 class OutputMap;
 class QSplitter;
+class QComboBox;
+class QLineEdit;
+class QLabel;
 class QAction;
 class QMenu;
 
@@ -71,6 +81,9 @@ public slots:
     /** Callback for Doc::fixtureRemoved() signals */
     void slotFixtureRemoved(quint32 id);
 
+    /** Callback for Doc::fixtureChanged() signals */
+    void slotFixtureChanged(quint32 id);
+
     /** Callback for Doc::channelsGroupRemoved() signals */
     void slotChannelsGroupRemoved(quint32 id);
 
@@ -99,8 +112,17 @@ public:
     /** Update the list of channels group */
     void updateChannelsGroupView();
 
+    /** Update the patch grid summary label */
+    void updatePatchSummary();
+
     /** Update icons on RDM view activation */
     void updateRDMView();
+
+    /** Get the fixtures selected in the active view */
+    QList <quint32> selectedFixtures() const;
+
+    /** Select the given fixtures in the patch table */
+    void selectFixtures(const QList <quint32>& ids);
 
 private:
     /** Open a fixture selector to add new fixtures */
@@ -118,6 +140,12 @@ private:
     /** Construct the list view and data view */
     void initDataView();
 
+    /** Construct the patch matrix tab */
+    void initPatchView();
+
+    /** Construct the flat patch table tab */
+    void initFixturesView();
+
     /** Handle single fixture selection */
     void fixtureSelected(quint32 id);
 
@@ -127,9 +155,24 @@ private:
     /** Create the text browser for displaying information */
     void createInfo();
 
+    /** Show a temporary warning message at the bottom of the view */
+    void showWarning(const QString& message);
+
+    /** Get the fixture group nodes currently selected in the tree */
+    QList <quint32> selectedGroups() const;
+
 private slots:
     /** Callback for fixture list selection changes */
     void slotSelectionChanged();
+
+    /** Callback for patch table selection changes */
+    void slotTableSelectionChanged();
+
+    /** Callback for patch table double clicks */
+    void slotTableDoubleClicked(const QModelIndex& index);
+
+    /** Callback for right mouse button clicks over the patch table */
+    void slotTableContextMenuRequested(const QPoint& pos);
 
     /** Callback for channels group selection changes */
     void slotChannelsGroupSelectionChanged();
@@ -147,6 +190,20 @@ private slots:
     void slotFixtureItemExpanded();
 
     void slotDisplayFixtureInfo(QString &info);
+
+    /** Patch matrix slots */
+    void slotGridFixtureClicked(quint32 id, Qt::KeyboardModifiers modifiers);
+    void slotGridFixtureDoubleClicked(quint32 id);
+    void slotGridContextMenuRequested(quint32 id, const QPoint& pos);
+    void slotGridMoveRequested(quint32 id, quint32 universeAddress);
+    void slotPatchUniverseChanged(int index);
+    void slotPatchZoomIn();
+    void slotPatchZoomOut();
+    void slotPatchOrientationToggled(bool checked);
+    void slotPatchExpandToggled(bool checked);
+    void slotPatchSearchChanged(const QString& filter);
+    void slotPatchOverlapDetected(quint32 id, const QList <quint32>& others);
+    void slotPatchRenumber();
 
 private:
     /** Select a fixture group */
@@ -178,6 +235,17 @@ private:
     QTreeWidget* m_channel_groups_tree;
     QWidget* m_rdmManager;
 
+    PatchGridWidget* m_patchGrid;
+    QComboBox* m_universeCombo;
+    QLabel* m_patchSummary;
+
+    QTableView* m_patchTable;
+    FixturePatchModel* m_patchModel;
+    QSortFilterProxyModel* m_patchProxy;
+    QLineEdit* m_patchSearch;
+
+    QLabel* m_statusLabel;
+
     QTextBrowser* m_info;
     FixtureGroupEditor* m_groupEditor;
     int m_currentTabIndex;
@@ -201,8 +269,8 @@ private:
     /** Edit properties for the selected channels group */
     void editChannelGroupProperties();
 
-    /** Count the number of heads in the list of fixture items */
-    int headCount(const QList <QTreeWidgetItem*>& items) const;
+    /** Count the number of heads in the given list of fixtures */
+    int headCount(const QList <quint32>& ids) const;
 
     QString createDialog(bool import);
 
@@ -239,6 +307,13 @@ private:
 
     QAction* m_importAction;
     QAction* m_exportAction;
+
+    QAction* m_zoomInAction;
+    QAction* m_zoomOutAction;
+    QAction* m_orientAction;
+    QAction* m_expandAction;
+    QAction* m_renumberAction;
+
     QMenu* m_groupMenu;
 };
 

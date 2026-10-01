@@ -12,7 +12,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "miDebuggerPath": "/usr/bin/lldb",
             "preLaunchTask": "build: debug",
             "setupCommands": [
                 {
@@ -34,7 +33,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "miDebuggerPath": "/usr/bin/lldb",
             "visualizerFile": "/Users/ericbafa/Library/Application Support/Code/User/workspaceStorage/0f6ea710b284506578977fc2347e3b15/tonka3000.qtvsctools/qt.natvis.xml"
         },
         {
@@ -48,7 +46,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "miDebuggerPath": "/usr/bin/lldb",
             "preLaunchTask": "build: debug",
             "visualizerFile": "/Users/ericbafa/Library/Application Support/Code/User/workspaceStorage/0f6ea710b284506578977fc2347e3b15/tonka3000.qtvsctools/qt.natvis.xml"
         }

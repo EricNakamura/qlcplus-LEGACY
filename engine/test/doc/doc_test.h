@@ -44,6 +44,7 @@ private slots:
     void createFixtureId();
     void addFixture();
     void deleteFixture();
+    void overlappingAddresses();
     void replaceFixtures();
     void fixture();
     void totalPowerConsumption();

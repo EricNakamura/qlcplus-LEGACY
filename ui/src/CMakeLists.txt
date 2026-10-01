@@ -53,6 +53,7 @@ add_library(${module_name}
     fixtureconsole.cpp fixtureconsole.h
     fixturegroupeditor.cpp fixturegroupeditor.h fixturegroupeditor.ui
     fixturemanager.cpp fixturemanager.h
+    fixturepatchmodel.cpp fixturepatchmodel.h
     fixtureremap.cpp fixtureremap.h fixtureremap.ui
     fixtureselection.cpp fixtureselection.h fixtureselection.ui
     fixturetreewidget.cpp fixturetreewidget.h
@@ -78,6 +79,9 @@ add_library(${module_name}
     monitor/monitorgraphicsview.cpp monitor/monitorgraphicsview.h
     monitor/monitorlayout.cpp monitor/monitorlayout.h
     palettegenerator.cpp palettegenerator.h
+    patchcolor.h
+    patchgridwidget.cpp patchgridwidget.h
+    patchrenumber.cpp patchrenumber.h patchrenumber.ui
     playbackslider.cpp playbackslider.h
     positiontool.cpp positiontool.h positiontool.ui
     rdmmanager.cpp rdmmanager.h rdmmanager.ui

@@ -256,6 +256,10 @@ public:
      * If id != Fixture::invalidId(), doc attempts to put the fixture at
      * that exact index, unless another fixture already occupies it.
      *
+     * Fixtures are allowed to share the same DMX address space (overlap).
+     * In that case the fixture that has been added first is considered the
+     * primary one and defines the shared channels properties.
+     *
      * @param fixture The fixture to add
      * @param id The requested ID for the fixture
      * @return true if the fixture was successfully added to doc,
@@ -309,13 +313,31 @@ public:
     int fixturesCount() const;
 
     /**
-     * Get the fixture that occupies the given DMX address. If multiple fixtures
-     * occupy the same address, the one that has been last modified is returned.
+     * Get the fixture that primarily occupies the given DMX address.
+     * If multiple fixtures share the same address, the one that has been
+     * added first is returned.
      *
      * @param universeAddress The universe & address of the fixture to look for
      * @return The fixture ID or Fixture::invalidId() if not found
      */
     quint32 fixtureForAddress(quint32 universeAddress) const;
+
+    /**
+     * Get all the fixtures that occupy the given DMX address, in the order
+     * they have been added. An empty list is returned if the address is free.
+     *
+     * @param universeAddress The universe & address of the fixture to look for
+     * @return A list of fixture IDs
+     */
+    QList <quint32> fixturesAtAddress(quint32 universeAddress) const;
+
+    /**
+     * Check whether the given DMX address is not occupied by any fixture
+     *
+     * @param universeAddress The universe & address to check
+     * @return true if no fixture occupies the address
+     */
+    bool isAddressFree(quint32 universeAddress) const;
 
     /**
      * Get the total power consumption of all fixtures in the current
@@ -331,6 +353,16 @@ protected:
      * Create a new fixture ID
      */
     quint32 createFixtureId();
+
+    /**
+     * Re-apply the DMX channel properties (capability, default value and
+     * modifier) of the fixtures occupying the given addresses.
+     * When multiple fixtures share an address, the first added one
+     * (the primary) defines the channel properties.
+     *
+     * @param universeAddresses The list of universe & addresses to update
+     */
+    void applyChannelProperties(const QList <quint32>& universeAddresses);
 
 signals:
     /** Signal that a fixture has been added */
@@ -354,8 +386,10 @@ protected:
     bool m_fixturesListCacheUpToDate;
     QList<Fixture*> m_fixturesListCache;
 
-    /** Map of the addresses occupied by fixtures */
-    QHash <quint32, quint32> m_addresses;
+    /** Map of the addresses occupied by fixtures.
+     *  Multiple fixtures can share the same address. In that case the
+     *  fixture added first is considered the primary one */
+    QHash <quint32, QList <quint32> > m_addresses;
 
     /** Latest assigned fixture ID */
     quint32 m_latestFixtureId;
