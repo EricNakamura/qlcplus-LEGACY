@@ -60,8 +60,23 @@ public:
     void setFileName(QString path);
     QString fileName() const;
 
+    /** Get the fixture definition currently being edited */
+    QLCFixtureDef* fixtureDefinition() const;
+
     bool modified() const;
     void setModified(bool modified = true);
+
+    /**
+     * Check for unsaved changes and, if there are any, ask the user
+     * whether to save them or not.
+     *
+     * @return true if it is safe to close/switch away, otherwise false
+     */
+    bool requestClose();
+
+signals:
+    /** The fixture definition was successfully saved to a file */
+    void definitionSaved(QLCFixtureDef* fixtureDef);
 
 protected:
     QLCFixtureDef* m_fixtureDef;

@@ -23,8 +23,9 @@
 #include <QMainWindow>
 #include <QDir>
 
+#include "fixturedefio.h"
+
 class QLCFixtureDef;
-class QLCChannel;
 class QToolBar;
 class QAction;
 class QMenu;
@@ -32,10 +33,6 @@ class QMenu;
 /** @addtogroup fixtureeditor Fixture Editor
  * @{
  */
-
-#define KAllFilter  QStringLiteral("Fixture Definitions (*.qxf *.d4)")
-#define KQXFFilter  QStringLiteral("QLC fixtures (*.qxf)")
-#define KD4Filter   QStringLiteral("Avolites fixtures (*.d4)")
 
 class App final : public QMainWindow
 {
@@ -56,43 +53,9 @@ public:
      */
     void loadFixtureDefinition(const QString& path);
 
-private:
-    /**
-     * Load a native QLC fixture definition from $path.
-     *
-     * @param path The path to a .qxf file to load
-     * @param errorMsg An optional error message
-     * @return A newly-created QLCFixtureDef if successful, otherwise NULL.
-     *         Ownership of the pointer is transferred to the caller.
-     */
-    QLCFixtureDef* loadQXF(const QString& path, QString& errorMsg) const;
-
-    /**
-     * Load an Avolites Diamond 4 fixture definition from $path.
-     *
-     * @param path The path to a .d4 file to load
-     * @param errorMsg An optional error message
-     * @return A newly-created QLCFixtureDef if successful, otherwise NULL.
-     *         Ownership of the pointer is transferred to the caller.
-     */
-    QLCFixtureDef* loadD4(const QString& path, QString& errorMsg) const;
-
 protected:
     void closeEvent(QCloseEvent*) override;
 
-    /*********************************************************************
-     * Copy channel
-     *********************************************************************/
-public:
-    void setCopyChannel(QLCChannel* ch);
-    QLCChannel* copyChannel() const;
-
-signals:
-    /** Signal telling that the contents of the clipboard have changed */
-    void clipboardChanged();
-
-protected:
-    QLCChannel* m_copyChannel;
     QDir m_workingDirectory;
 
     /*********************************************************************

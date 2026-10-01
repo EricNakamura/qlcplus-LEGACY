@@ -276,7 +276,7 @@
      <item>
       <widget class="QPushButton" name="m_buttonCreateFix">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Open Fixture Maneger to Create a new Fixture&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>Open the fixture definition editor to create a new fixture</string>
        </property>
        <property name="text">
         <string>Create Fixture</string>

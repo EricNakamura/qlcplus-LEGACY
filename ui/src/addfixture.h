@@ -59,6 +59,9 @@ class AddFixture final: public QDialog, public Ui_AddFixture {
     /** Destructor */
     ~AddFixture();
 
+    /** @reimp */
+    void done(int result) override;
+
     /*********************************************************************
      * Value getters
      *********************************************************************/
@@ -155,8 +158,15 @@ class AddFixture final: public QDialog, public Ui_AddFixture {
      */
     bool checkAddressAvailability(int value, int channels);
 
+    /** Persist the expanded state of the fixture definition tree */
+    void saveExpandedState();
+
     protected:
     int m_fxiCount;
+
+    /** Definition to select after the tree was refreshed */
+    QString m_pendingManufacturer;
+    QString m_pendingModel;
 
     /*********************************************************************
      * Slots
@@ -196,6 +206,12 @@ class AddFixture final: public QDialog, public Ui_AddFixture {
     void slotDiptoolButtonClicked();
 
     void slotCreateFixtureClicked();
+
+    /** Callback for added or modified fixture definitions */
+    void slotDefinitionsChanged();
+
+    /** Callback for definitions saved by the embedded editor */
+    void slotDefinitionSaved(QLCFixtureDef *fixtureDef);
 
     protected:
     void checkOverlapping();

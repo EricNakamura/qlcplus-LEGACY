@@ -37,7 +37,7 @@ Rectangle
         id: errorPopup
         standardButtons: Dialog.Ok
         title: qsTr("Error")
-        message: qsTr("Address overlapping detected.\nPlease set another DMX address.")
+        message: qsTr("Unable to patch the fixture.\nPlease check the target universe and address.")
         onAccepted: close()
     }
 

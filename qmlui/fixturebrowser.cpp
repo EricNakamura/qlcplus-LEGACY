@@ -26,6 +26,7 @@
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
 #include "treemodelitem.h"
+#include "universe.h"
 #include "treemodel.h"
 #include "doc.h"
 
@@ -252,47 +253,50 @@ void FixtureBrowser::setManufacturerIndex(int index)
 int FixtureBrowser::availableChannel(quint32 uniIdx, int channels, int quantity, int gap, int requested)
 {
     qDebug() << "[FixtureBrowser] uniIdx:" << uniIdx << ", channels:" << channels << ", requested:" << requested;
-    bool isAvailable = true;
     quint32 uniFilter = uniIdx == Universe::invalid() ? 0 : uniIdx;
     quint32 absAddress = (requested & 0x01FF) | (uniFilter << 9);
+    quint32 maxAddress = m_doc->inputOutputMap()->universesCount() * UNIVERSE_SIZE;
+
+    /* Overlapping addresses are allowed: when the requested space is already
+       used, keep it, so the user can deliberately overlap fixtures. The first
+       added fixture stays the primary one on the shared channels */
+    bool overflow = false;
+    quint32 scanAddress = absAddress;
     for (int n = 0; n < quantity; n++)
     {
-        for (int i = 0; i < channels; i++)
+        if (scanAddress + channels > maxAddress)
         {
-            if (m_doc->fixtureForAddress(absAddress + i) != Fixture::invalidId())
-            {
-                isAvailable = false;
-                break;
-            }
+            overflow = true;
+            break;
         }
-        absAddress += channels + gap;
+        scanAddress += channels + gap;
     }
-    if (isAvailable == true)
+
+    if (overflow == false)
     {
         qDebug() << "[FixtureBrowser] Requested channel is available:" << requested;
         return requested;
     }
-    else
-    {
-        qDebug() << "[FixtureBrowser] Requested channel" << requested << "not available in universe" << uniFilter;
-        int validAddr = 0;
-        int freeCounter = 0;
-        absAddress = uniFilter << 9;
-        for (int i = 0; i < 512; i++)
-        {
-            if (m_doc->fixtureForAddress(absAddress + i) != Fixture::invalidId())
-            {
-                freeCounter = 0;
-                validAddr = i + 1;
-            }
-            else
-                freeCounter++;
 
-            if (freeCounter == (channels * quantity) + (gap * quantity))
-            {
-                qDebug() << "[FixtureBrowser] Returning available address:" << validAddr;
-                return validAddr;
-            }
+    /* The requested space doesn't fit: search the next available position */
+    qDebug() << "[FixtureBrowser] Requested channel" << requested << "not available in universe" << uniFilter;
+    int validAddr = 0;
+    int freeCounter = 0;
+    quint32 searchAddress = uniFilter << 9;
+    for (int i = 0; i < 512; i++)
+    {
+        if (m_doc->fixtureForAddress(searchAddress + i) != Fixture::invalidId())
+        {
+            freeCounter = 0;
+            validAddr = i + 1;
+        }
+        else
+            freeCounter++;
+
+        if (freeCounter == (channels * quantity) + (gap * quantity))
+        {
+            qDebug() << "[FixtureBrowser] Returning available address:" << validAddr;
+            return validAddr;
         }
     }
 
@@ -302,32 +306,20 @@ int FixtureBrowser::availableChannel(quint32 uniIdx, int channels, int quantity,
 int FixtureBrowser::availableChannel(quint32 fixtureID, int requested)
 {
     qDebug() << "[FixtureBrowser] fxID:" << fixtureID << ", requested:" << requested;
-    bool isAvailable = true;
 
     Fixture *fixture = m_doc->fixture(fixtureID);
     if (fixture == nullptr)
         return -1;
 
-    quint32 channels = fixture->channels();
     quint32 absAddress = (requested & 0x01FF) | (fixture->universe() << 9);
+    quint32 maxAddress = m_doc->inputOutputMap()->universesCount() * UNIVERSE_SIZE;
 
-    for (quint32 i = 0; i < channels; i++)
-    {
-        quint32 fxIDOnAddr = m_doc->fixtureForAddress(absAddress + i);
-        if (fxIDOnAddr != Fixture::invalidId() && fxIDOnAddr != fixtureID)
-        {
-            isAvailable = false;
-            break;
-        }
-    }
+    if (absAddress + fixture->channels() > maxAddress)
+        return -1;
 
-    if (isAvailable == true)
-    {
-        qDebug() << "[FixtureBrowser] Requested channel is available:" << requested;
-        return requested;
-    }
-
-    return -1;
+    /* Overlapping addresses are allowed: the fixture can be moved on top of
+       another one, which then becomes a secondary on the shared channels */
+    return requested;
 }
 
 QString FixtureBrowser::searchFilter() const

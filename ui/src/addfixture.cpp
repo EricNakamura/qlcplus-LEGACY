@@ -31,7 +31,6 @@
 #include <QSpinBox>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QProcess>
 
 #include "qlcfixturedef.h"
 #include "qlcfixturedefcache.h"
@@ -41,6 +40,8 @@
 #include "addresstool.h"
 #include "apputil.h"
 #include "doc.h"
+#include "fixtureeditordialog.h"
+#include "fixturedefwatcher.h"
 
 #define SETTINGS_GEOMETRY "addfixture/geometry"
 
@@ -92,6 +93,12 @@ AddFixture::AddFixture(QWidget *parent, const Doc *doc, const Fixture *fxi)
   connect(m_buttonCreateFix, SIGNAL(clicked()), this,
           SLOT(slotCreateFixtureClicked()));
 
+  /* Refresh the definition tree when definitions are added or modified
+     while this dialog is open */
+  if (FixtureDefWatcher::instance() != NULL) {
+    connect(FixtureDefWatcher::instance(), SIGNAL(definitionsChanged()), this,
+            SLOT(slotDefinitionsChanged()));
+  }
   /* Fill fixture definition tree (and select a fixture def) */
   if (fxi != NULL) {
     fillTree(fxi->fixtureDef()->manufacturer(), fxi->fixtureDef()->model());
@@ -150,17 +157,7 @@ AddFixture::~AddFixture() {
   QSettings settings;
   settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
 
-  QList<QVariant> expanded;
-  QTreeWidgetItem *root = m_tree->invisibleRootItem();
-
-  for (int i = 0; i < root->childCount(); i++) {
-    QTreeWidgetItem *manuf = root->child(i);
-    if (manuf->isExpanded()) {
-      expanded << manuf->text(KColumnName);
-    }
-  }
-
-  settings.setValue(SETTINGS_EXPANDED, expanded);
+  saveExpandedState();
 }
 
 /*****************************************************************************
@@ -392,11 +389,93 @@ bool AddFixture::checkAddressAvailability(int value, int channels) {
  *****************************************************************************/
 
 void AddFixture::slotCreateFixtureClicked() {
-  QString path(QApplication::applicationDirPath());
-    if (path.endsWith(QString("/")) == false)
-        path += QString("/");
-    path += QString("qlcplus-fixtureeditor");
-    QProcess::startDetached(path, QStringList());
+  /* Open the embedded fixture definition editor to create a new definition */
+  FixtureEditorDialog *dialog =
+      new FixtureEditorDialog(this, m_doc, new QLCFixtureDef());
+  connect(dialog, SIGNAL(definitionSaved(QLCFixtureDef *)), this,
+          SLOT(slotDefinitionSaved(QLCFixtureDef *)));
+  dialog->show();
+}
+
+void AddFixture::slotDefinitionSaved(QLCFixtureDef *fixtureDef) {
+  if (fixtureDef != NULL) {
+    m_pendingManufacturer = fixtureDef->manufacturer();
+    m_pendingModel = fixtureDef->model();
+  }
+
+  slotDefinitionsChanged();
+}
+
+void AddFixture::slotDefinitionsChanged() {
+  /* Keep the currently selected definition, if any */
+  QString manufacturer = KXMLFixtureGeneric;
+  QString model = KXMLFixtureGeneric;
+  bool hadSelection = false;
+
+  QTreeWidgetItem *item = m_tree->currentItem();
+  if (item != NULL && item->parent() != NULL) {
+    manufacturer = item->parent()->text(KColumnName);
+    model = item->text(KColumnName);
+    hadSelection = true;
+  }
+
+  /* A definition just saved by the embedded editor takes precedence,
+     so that it is selected right away */
+  bool followSavedDefinition = (m_pendingManufacturer.isEmpty() == false);
+  if (followSavedDefinition == true) {
+    manufacturer = m_pendingManufacturer;
+    model = m_pendingModel;
+  }
+  m_pendingManufacturer.clear();
+  m_pendingModel.clear();
+
+  saveExpandedState();
+
+  /* Refill the tree without disturbing the fields the user may have
+     already filled in (name, address, etc.) */
+  m_tree->blockSignals(true);
+  m_fxiCount = 0;
+  fillTree(manufacturer, model);
+  m_tree->blockSignals(false);
+
+  QTreeWidgetItem *current = m_tree->currentItem();
+  bool selectionKept =
+      (hadSelection == true && followSavedDefinition == false &&
+       current != NULL && current->parent() != NULL &&
+       current->parent()->text(KColumnName) == manufacturer &&
+       current->text(KColumnName) == model);
+
+  /* If the definition changed, update the fields accordingly */
+  if (selectionKept == false)
+    slotSelectionChanged();
+
+  m_fixturesCount->setText(tr("Fixtures found: %1").arg(m_fxiCount));
+}
+
+void AddFixture::saveExpandedState() {
+  QList<QVariant> expanded;
+  QTreeWidgetItem *root = m_tree->invisibleRootItem();
+
+  for (int i = 0; i < root->childCount(); i++) {
+    QTreeWidgetItem *manuf = root->child(i);
+    if (manuf->isExpanded()) {
+      expanded << manuf->text(KColumnName);
+    }
+  }
+
+  QSettings settings;
+  settings.setValue(SETTINGS_EXPANDED, expanded);
+}
+
+void AddFixture::done(int result) {
+  /* Give any open fixture definition editor the chance to save its work */
+  foreach (FixtureEditorDialog *editor,
+           findChildren<FixtureEditorDialog *>()) {
+    if (editor->requestClose() == false)
+      return;
+  }
+
+  QDialog::done(result);
 }
 
 void AddFixture::slotModeActivated(int modeIndex) {

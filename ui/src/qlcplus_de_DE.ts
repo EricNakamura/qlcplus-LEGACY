@@ -2296,120 +2296,240 @@ Changes will be lost if you don&apos;t save them.</source>
     </message>
 </context>
 <context>
+    <name>FixtureInspector</name>
+    <message>
+        <location filename="fixtureinspector.ui" line="86"/>
+        <source>Properties...</source>
+        <translation type="unfinished">Eigenschaften...</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="108"/>
+        <source>Summary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="114"/>
+        <location filename="fixtureinspector.cpp" line="50"/>
+        <source>Type</source>
+        <translation type="unfinished">Typ</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="128"/>
+        <source>Universe</source>
+        <translation type="unfinished">Universum</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="142"/>
+        <source>Address</source>
+        <translation type="unfinished">Adresse</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="156"/>
+        <location filename="fixtureinspector.ui" line="187"/>
+        <source>Channels</source>
+        <translation type="unfinished">Kanäle</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="170"/>
+        <source>Heads</source>
+        <translation type="unfinished">Heads</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.ui" line="209"/>
+        <source>Details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="50"/>
+        <source>#</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="50"/>
+        <source>Name</source>
+        <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="50"/>
+        <source>DMX</source>
+        <translation type="unfinished">DMX</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="50"/>
+        <source>Flags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="192"/>
+        <source>Warning: overlapping with %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="240"/>
+        <source>Fade</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="242"/>
+        <source>Modifier</source>
+        <translation type="unfinished">Modifizierer</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="269"/>
+        <source>Size</source>
+        <translation type="unfinished">Größe</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="274"/>
+        <source>Weight</source>
+        <translation type="unfinished">Gewicht</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="278"/>
+        <source>Power consumption</source>
+        <translation type="unfinished">Leistungsaufnahme</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="281"/>
+        <source>DMX Connector</source>
+        <translation type="unfinished">DMX-Anschluss</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="287"/>
+        <source>Bulb</source>
+        <translation type="unfinished">Leuchtmittel</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="296"/>
+        <source>Lens</source>
+        <translation type="unfinished">Linse</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="303"/>
+        <source>Head(s)</source>
+        <translation type="unfinished">Head(s)</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="310"/>
+        <source>No physical information available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="330"/>
+        <source>Binary Address (DIP)</source>
+        <translation type="unfinished">Binäre Adresse (DIP)</translation>
+    </message>
+    <message>
+        <location filename="fixtureinspector.cpp" line="335"/>
+        <source>Fixture definition author:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FixtureManager</name>
     <message>
-        <location filename="fixturemanager.cpp" line="383"/>
-        <location filename="fixturemanager.cpp" line="1481"/>
-        <location filename="fixturemanager.cpp" line="1529"/>
+        <location filename="fixturemanager.cpp" line="391"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="383"/>
-        <location filename="fixturemanager.cpp" line="1429"/>
+        <location filename="fixturemanager.cpp" line="391"/>
         <source>Channels</source>
         <translation>Kanäle</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="920"/>
-        <location filename="fixturemanager.cpp" line="999"/>
+        <location filename="fixturemanager.cpp" line="959"/>
+        <location filename="fixturemanager.cpp" line="1038"/>
         <source>&lt;H1&gt;Multiple fixtures selected&lt;/H1&gt;&lt;P&gt;Click &lt;IMG SRC=&quot;:/edit_remove.png&quot;&gt; to remove the selected fixtures.&lt;/P&gt;</source>
         <translation>&lt;H1&gt;Mehrere Geräte ausgewählt&lt;/H1&gt;&lt;P&gt;Klick &lt;IMG SRC=&quot;:/edit_remove.png&quot;&gt; zum Entfernen der ausgewählten Geräte.&lt;/P&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="946"/>
-        <location filename="fixturemanager.cpp" line="1020"/>
+        <location filename="fixturemanager.cpp" line="985"/>
+        <location filename="fixturemanager.cpp" line="1059"/>
         <source>&lt;H1&gt;Multiple fixtures selected&lt;/H1&gt;&lt;P&gt;Fixture list modification is not permitted in operate mode.&lt;/P&gt;</source>
         <translation>&lt;H1&gt;Mehrere Geräte ausgewählt&lt;/H1&gt;&lt;P&gt;Gerätelistenänderungen sind während der Laufzeit nicht zulässig.&lt;/P&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="955"/>
+        <location filename="fixturemanager.cpp" line="994"/>
         <source>&lt;H1&gt;No fixtures&lt;/H1&gt;&lt;P&gt;Click &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt; to add fixtures.&lt;/P&gt;</source>
         <translation>&lt;H1&gt;Keine Geräte&lt;/H1&gt;&lt;P&gt;Klick &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt;, um Geräte hinzuzufügen.&lt;/P&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="961"/>
+        <location filename="fixturemanager.cpp" line="1000"/>
         <source>&lt;H1&gt;Nothing selected&lt;/H1&gt;&lt;P&gt;Select a fixture from the list or click &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt; to add fixtures.&lt;/P&gt;</source>
         <translation>&lt;H1&gt;Keine Auswahl&lt;/H1&gt;&lt;P&gt;Gerät aus der Liste wählen oder auf &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt; klicken, um Geräte hinzuzufügen.&lt;/P&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1260"/>
+        <location filename="fixturemanager.cpp" line="1330"/>
         <source>&lt;HTML&gt;&lt;BODY&gt;&lt;H1&gt;Multiple groups selected&lt;/H1&gt;&lt;P&gt;Click &lt;IMG SRC=&quot;:/edit_remove.png&quot;&gt; to remove the selected groups.&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;</source>
         <translation>&lt;HTML&gt;&lt;BODY&gt;&lt;H1&gt;Mehrere Gruppen ausgewählt&lt;/H1&gt;&lt;P&gt;Auf &lt;IMG SRC=&quot;:/edit_remove.png&quot;&gt; klicken, um die ausgewählte Gruppe zu entfernen.&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1268"/>
+        <location filename="fixturemanager.cpp" line="1338"/>
         <source>&lt;HTML&gt;&lt;BODY&gt;&lt;H1&gt;Nothing selected&lt;/H1&gt;&lt;P&gt;Select a channel group from the list or click &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt; to add a new channels group.&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;</source>
         <translation>&lt;HTML&gt;&lt;BODY&gt;&lt;H1&gt;Keine Auswahl&lt;/H1&gt;&lt;P&gt;Kanalgruppe aus der Liste wählen oder Klick &lt;IMG SRC=&quot;:/edit_add.png&quot;&gt;, um Kanalgruppe hinzuzufügen.&lt;/P&gt;&lt;/BODY&gt;&lt;/HTML&gt;</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1295"/>
+        <location filename="fixturemanager.cpp" line="1365"/>
         <source>Add group...</source>
         <translation>Gruppe hinzufügen...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1303"/>
-        <location filename="fixturemanager.cpp" line="1308"/>
-        <location filename="fixturemanager.cpp" line="1314"/>
-        <location filename="fixturemanager.cpp" line="1657"/>
+        <location filename="fixturemanager.cpp" line="1373"/>
+        <location filename="fixturemanager.cpp" line="1378"/>
+        <location filename="fixturemanager.cpp" line="1384"/>
+        <location filename="fixturemanager.cpp" line="1507"/>
         <source>Add fixture...</source>
         <translation>Gerät hinzufügen ...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1415"/>
         <source>Manufacturer</source>
-        <translation>Hersteller</translation>
+        <translation type="vanished">Hersteller</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1416"/>
         <source>Model</source>
-        <translation>Modell</translation>
+        <translation type="vanished">Modell</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1417"/>
         <source>Mode</source>
-        <translation>Modus</translation>
+        <translation type="vanished">Modus</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1418"/>
-        <location filename="fixturemanager.cpp" line="1520"/>
-        <location filename="fixturemanager.cpp" line="1546"/>
         <source>Type</source>
-        <translation>Typ</translation>
+        <translation type="vanished">Typ</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="430"/>
-        <location filename="fixturemanager.cpp" line="1422"/>
+        <location filename="fixturemanager.cpp" line="438"/>
         <source>Universe</source>
         <translation>Universum</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="347"/>
+        <location filename="fixturemanager.cpp" line="355"/>
         <source>Patch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="351"/>
+        <location filename="fixturemanager.cpp" line="359"/>
         <source>Fixtures</source>
         <translation type="unfinished">Geräte</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="379"/>
+        <location filename="fixturemanager.cpp" line="387"/>
         <source>Groups</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="484"/>
+        <location filename="fixturemanager.cpp" line="492"/>
         <source>Search...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="633"/>
+        <location filename="fixturemanager.cpp" line="641"/>
         <source>%1/512 channels used</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="fixturemanager.cpp" line="636"/>
+        <location filename="fixturemanager.cpp" line="644"/>
         <source>%n overlapping channel(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -2417,295 +2537,289 @@ Changes will be lost if you don&apos;t save them.</source>
         </translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="639"/>
+        <location filename="fixturemanager.cpp" line="647"/>
         <source>next free block of 8 channels at %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="641"/>
+        <location filename="fixturemanager.cpp" line="649"/>
         <source>no free block of 8 channels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1164"/>
+        <location filename="fixturemanager.cpp" line="1204"/>
         <source>Columns</source>
         <translation type="unfinished">Spalten</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1164"/>
-        <location filename="fixturemanager.cpp" line="1731"/>
+        <location filename="fixturemanager.cpp" line="1204"/>
+        <location filename="fixturemanager.cpp" line="1581"/>
         <source>Rows</source>
         <translation type="unfinished">Zeilen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1174"/>
+        <location filename="fixturemanager.cpp" line="1214"/>
         <source>Collapse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1174"/>
-        <location filename="fixturemanager.cpp" line="1737"/>
+        <location filename="fixturemanager.cpp" line="1214"/>
+        <location filename="fixturemanager.cpp" line="1587"/>
         <source>Expand</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1202"/>
+        <location filename="fixturemanager.cpp" line="1242"/>
         <source>Warning: %1 overlaps with %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1211"/>
+        <location filename="fixturemanager.cpp" line="1251"/>
         <source>Renumber fixtures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1212"/>
+        <location filename="fixturemanager.cpp" line="1252"/>
         <source>Please select at least one fixture to renumber.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1426"/>
         <source>Address Range</source>
-        <translation>Adressbereich</translation>
+        <translation type="vanished">Adressbereich</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1453"/>
-        <source>Overlaps with</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="fixturemanager.cpp" line="1471"/>
         <source>Binary Address (DIP)</source>
-        <translation>Binäre Adresse (DIP)</translation>
+        <translation type="vanished">Binäre Adresse (DIP)</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1479"/>
-        <location filename="fixturemanager.cpp" line="1619"/>
+        <location filename="fixturemanager.cpp" line="1469"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1480"/>
         <source>DMX</source>
-        <translation>DMX</translation>
+        <translation type="vanished">DMX</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1498"/>
         <source>Physical</source>
-        <translation>Abmessungen</translation>
+        <translation type="vanished">Abmessungen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1505"/>
         <source>Width</source>
-        <translation>Breite</translation>
+        <translation type="vanished">Breite</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1507"/>
         <source>Height</source>
-        <translation>Höhe</translation>
+        <translation type="vanished">Höhe</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1509"/>
         <source>Depth</source>
-        <translation>Tiefe</translation>
+        <translation type="vanished">Tiefe</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1511"/>
         <source>Weight</source>
-        <translation>Gewicht</translation>
+        <translation type="vanished">Gewicht</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1513"/>
         <source>Power consumption</source>
-        <translation>Leistungsaufnahme</translation>
+        <translation type="vanished">Leistungsaufnahme</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1514"/>
         <source>DMX Connector</source>
-        <translation>DMX-Anschluss</translation>
+        <translation type="vanished">DMX-Anschluss</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1519"/>
         <source>Bulb</source>
-        <translation>Leuchtmittel</translation>
+        <translation type="vanished">Leuchtmittel</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1521"/>
         <source>Luminous Flux</source>
-        <translation>Lumen</translation>
+        <translation type="vanished">Lumen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1522"/>
         <source>Colour Temperature</source>
-        <translation>Farbtemperatur</translation>
+        <translation type="vanished">Farbtemperatur</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1528"/>
         <source>Lens</source>
-        <translation>Linse</translation>
+        <translation type="vanished">Linse</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1533"/>
-        <location filename="fixturemanager.cpp" line="1538"/>
         <source>Beam Angle</source>
-        <translation>Abstrahlwinkel</translation>
+        <translation type="vanished">Abstrahlwinkel</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1545"/>
         <source>Head(s)</source>
-        <translation>Head(s)</translation>
+        <translation type="vanished">Head(s)</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1547"/>
         <source>Pan Range</source>
-        <translation>Pan-Bereich</translation>
+        <translation type="vanished">Pan-Bereich</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1548"/>
         <source>Tilt Range</source>
-        <translation>Tilt-Bereich</translation>
+        <translation type="vanished">Tilt-Bereich</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1551"/>
         <source>Layout</source>
-        <translation>Anordnung</translation>
+        <translation type="vanished">Anordnung</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1563"/>
         <source>Fixture definition author: </source>
-        <translation>Autor der Gerätedefinition: </translation>
+        <translation type="vanished">Autor der Gerätedefinition: </translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1192"/>
-        <location filename="fixturemanager.cpp" line="1618"/>
+        <location filename="fixturemanager.cpp" line="1232"/>
+        <location filename="fixturemanager.cpp" line="1468"/>
         <source>Fixture</source>
         <translation>Gerät</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1620"/>
+        <location filename="fixturemanager.cpp" line="1277"/>
+        <location filename="fixturemanager.cpp" line="1283"/>
+        <source>Repack universe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixturemanager.cpp" line="1278"/>
+        <source>There are no fixtures patched in the selected universe.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixturemanager.cpp" line="1470"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1638"/>
+        <location filename="fixturemanager.cpp" line="1488"/>
         <source>Channel %1</source>
         <translation>Kanal %1</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1662"/>
+        <location filename="fixturemanager.cpp" line="1512"/>
         <source>Add RGB panel...</source>
         <translation>RGB-Panel hinzufügen...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1667"/>
+        <location filename="fixturemanager.cpp" line="1517"/>
         <source>Delete items</source>
         <translation>Objekte löschen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1672"/>
+        <location filename="fixturemanager.cpp" line="1522"/>
         <source>Properties...</source>
         <translation>Eigenschaften...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1677"/>
+        <location filename="fixturemanager.cpp" line="1527"/>
         <source>Channels Fade Configuration...</source>
         <translation>Kanalfader-Einstellungen...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1683"/>
+        <location filename="fixturemanager.cpp" line="1533"/>
         <source>Add fixture to group...</source>
         <translation>Gerät zur Gruppe hinzufügen...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1686"/>
+        <location filename="fixturemanager.cpp" line="1536"/>
         <source>Remove fixture from group</source>
         <translation>Gerät aus Gruppe entfernen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1690"/>
+        <location filename="fixturemanager.cpp" line="1540"/>
         <source>New Group...</source>
         <translation>Neue Gruppe...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1693"/>
+        <location filename="fixturemanager.cpp" line="1543"/>
         <source>Move channel group up...</source>
         <oldsource>Move group up...</oldsource>
         <translation>Gruppe aufwärts verschieben...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1699"/>
+        <location filename="fixturemanager.cpp" line="1549"/>
         <source>Move channel group down...</source>
         <oldsource>Move group down...</oldsource>
         <translation>Gruppe abwärts verschieben...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1705"/>
+        <location filename="fixturemanager.cpp" line="1555"/>
         <source>Import fixtures...</source>
         <translation>Gerätedefinitionen importieren...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1710"/>
+        <location filename="fixturemanager.cpp" line="1560"/>
         <source>Export fixtures...</source>
         <translation>Gerätedefinitionen exportieren...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1716"/>
+        <location filename="fixturemanager.cpp" line="1566"/>
         <source>Remap fixtures...</source>
         <translation>Geräte neu zuweisen...</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1721"/>
+        <location filename="fixturemanager.cpp" line="1571"/>
         <source>Zoom +</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1722"/>
+        <location filename="fixturemanager.cpp" line="1572"/>
         <source>Increase the cell size of the patch matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1726"/>
+        <location filename="fixturemanager.cpp" line="1576"/>
         <source>Zoom -</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1727"/>
+        <location filename="fixturemanager.cpp" line="1577"/>
         <source>Decrease the cell size of the patch matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1732"/>
+        <location filename="fixturemanager.cpp" line="1582"/>
         <source>Change the channels filling order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1738"/>
+        <location filename="fixturemanager.cpp" line="1588"/>
         <source>Hide the info panel to enlarge the patch matrix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1744"/>
+        <location filename="fixturemanager.cpp" line="1594"/>
         <source>Renumber...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2015"/>
+        <location filename="fixturemanager.cpp" line="1599"/>
+        <source>Repack universe...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixturemanager.cpp" line="1600"/>
+        <source>Compact all the fixtures of the current universe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="fixturemanager.cpp" line="1872"/>
         <source>%1 - Row %2</source>
         <translation>%1 - Reihe %2</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2101"/>
+        <location filename="fixturemanager.cpp" line="1958"/>
         <source>Do you want to delete the selected items?</source>
         <translation>Ausgewählte Objekte löschen?</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2142"/>
+        <location filename="fixturemanager.cpp" line="1999"/>
         <source>Delete Channels Group</source>
         <translation>Kanalgruppe löschen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1811"/>
-        <location filename="fixturemanager.cpp" line="2261"/>
+        <location filename="fixturemanager.cpp" line="1668"/>
+        <location filename="fixturemanager.cpp" line="2118"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
@@ -2714,95 +2828,95 @@ Changes will be lost if you don&apos;t save them.</source>
         <translation type="vanished">Gerätegruppen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="395"/>
+        <location filename="fixturemanager.cpp" line="403"/>
         <source>Channel Groups</source>
         <translation>Kanalgruppen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="896"/>
+        <location filename="fixturemanager.cpp" line="935"/>
         <source>This group contains all fixtures of</source>
         <translation>Diese Gruppe enthält alle Geräte von</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="900"/>
-        <location filename="fixturemanager.cpp" line="941"/>
-        <location filename="fixturemanager.cpp" line="1015"/>
+        <location filename="fixturemanager.cpp" line="939"/>
+        <location filename="fixturemanager.cpp" line="980"/>
+        <location filename="fixturemanager.cpp" line="1054"/>
         <source>Total estimated weight</source>
         <translation>Geschätztes Gesamtgewicht</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="901"/>
-        <location filename="fixturemanager.cpp" line="942"/>
-        <location filename="fixturemanager.cpp" line="1016"/>
+        <location filename="fixturemanager.cpp" line="940"/>
+        <location filename="fixturemanager.cpp" line="981"/>
+        <location filename="fixturemanager.cpp" line="1055"/>
         <source>Maximum estimated power consumption</source>
         <translation>Geschätzte maximale elektrische Leistungsaufnahme</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1812"/>
-        <location filename="fixturemanager.cpp" line="2262"/>
+        <location filename="fixturemanager.cpp" line="1669"/>
+        <location filename="fixturemanager.cpp" line="2119"/>
         <source>Please enter a valid address</source>
         <translation>Bitte gültige Adresse eingeben</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2332"/>
+        <location filename="fixturemanager.cpp" line="2189"/>
         <source>Ungroup fixtures?</source>
         <translation>Geräte-Gruppierung aufheben?</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2333"/>
+        <location filename="fixturemanager.cpp" line="2190"/>
         <source>Do you want to ungroup the selected fixtures?</source>
         <translation>Gruppierung der ausgewählten Geräte aufheben?</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2423"/>
+        <location filename="fixturemanager.cpp" line="2280"/>
         <source>Import Fixtures List</source>
         <oldsource>Import Fixture Definition</oldsource>
         <translation>Gerätedefinitionsliste importieren</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2428"/>
+        <location filename="fixturemanager.cpp" line="2285"/>
         <source>Export Fixtures List As</source>
         <oldsource>Export Fixture Definition As</oldsource>
         <translation>Gerätedefinitionsliste exportieren unter</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2434"/>
+        <location filename="fixturemanager.cpp" line="2291"/>
         <source>Fixtures List (*%1)</source>
         <oldsource>Fixture Definitions (*%1)</oldsource>
         <translation>Gerätedefinitionsliste (*%1)</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2436"/>
+        <location filename="fixturemanager.cpp" line="2293"/>
         <source>All Files (*.*)</source>
         <translation>Alle Dateien (*.*)</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2438"/>
+        <location filename="fixturemanager.cpp" line="2295"/>
         <source>All Files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1777"/>
+        <location filename="fixturemanager.cpp" line="1633"/>
         <source>Fixture manager</source>
         <translation>Gerätemanager</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="1854"/>
+        <location filename="fixturemanager.cpp" line="1711"/>
         <source>Generic Dimmer</source>
         <translation>Generischer Dimmer</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2100"/>
+        <location filename="fixturemanager.cpp" line="1957"/>
         <source>Delete Fixtures</source>
         <translation>Geräte löschen</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2143"/>
+        <location filename="fixturemanager.cpp" line="2000"/>
         <source>Do you want to delete the selected groups?</source>
         <translation>Willst du die ausgewählten Gruppen entfernen?</translation>
     </message>
     <message>
-        <location filename="fixturemanager.cpp" line="2199"/>
+        <location filename="fixturemanager.cpp" line="2056"/>
         <source>Change fixture properties</source>
         <translation>Geräteeigenschaften ändern</translation>
     </message>
@@ -2810,55 +2924,55 @@ Changes will be lost if you don&apos;t save them.</source>
 <context>
     <name>FixturePatchModel</name>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="188"/>
-        <location filename="fixturepatchmodel.cpp" line="348"/>
+        <location filename="fixturepatchmodel.cpp" line="187"/>
+        <location filename="fixturepatchmodel.cpp" line="347"/>
         <source>Universe</source>
         <translation type="unfinished">Universum</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="189"/>
-        <location filename="fixturepatchmodel.cpp" line="349"/>
+        <location filename="fixturepatchmodel.cpp" line="188"/>
+        <location filename="fixturepatchmodel.cpp" line="348"/>
         <source>Address</source>
         <translation type="unfinished">Adresse</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="201"/>
+        <location filename="fixturepatchmodel.cpp" line="200"/>
         <source>Overlaps with: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="253"/>
-        <location filename="fixturepatchmodel.cpp" line="271"/>
+        <location filename="fixturepatchmodel.cpp" line="252"/>
+        <location filename="fixturepatchmodel.cpp" line="270"/>
         <source>Generic</source>
         <translation type="unfinished">Generisch</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="344"/>
+        <location filename="fixturepatchmodel.cpp" line="343"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="345"/>
+        <location filename="fixturepatchmodel.cpp" line="344"/>
         <source>Name</source>
         <translation type="unfinished">Name</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="346"/>
+        <location filename="fixturepatchmodel.cpp" line="345"/>
         <source>Type</source>
         <translation type="unfinished">Typ</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="347"/>
+        <location filename="fixturepatchmodel.cpp" line="346"/>
         <source>Model</source>
         <translation type="unfinished">Modell</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="350"/>
+        <location filename="fixturepatchmodel.cpp" line="349"/>
         <source>Channels</source>
         <translation type="unfinished">Kanäle</translation>
     </message>
     <message>
-        <location filename="fixturepatchmodel.cpp" line="351"/>
+        <location filename="fixturepatchmodel.cpp" line="350"/>
         <source>Groups</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4836,22 +4950,22 @@ Der Assistent kennt keinen Unterschied zwischen einem Schalter und einem Regler,
 <context>
     <name>PatchGridWidget</name>
     <message>
-        <location filename="patchgridwidget.cpp" line="469"/>
+        <location filename="patchgridwidget.cpp" line="490"/>
         <source>Address</source>
         <translation type="unfinished">Adresse</translation>
     </message>
     <message>
-        <location filename="patchgridwidget.cpp" line="478"/>
+        <location filename="patchgridwidget.cpp" line="499"/>
         <source>Channel</source>
         <translation type="unfinished">Kanal</translation>
     </message>
     <message>
-        <location filename="patchgridwidget.cpp" line="482"/>
+        <location filename="patchgridwidget.cpp" line="503"/>
         <source>channel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchgridwidget.cpp" line="487"/>
+        <location filename="patchgridwidget.cpp" line="508"/>
         <source>Address shared by multiple fixtures</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4894,27 +5008,32 @@ Der Assistent kennt keinen Unterschied zwischen einem Schalter und einem Regler,
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.ui" line="112"/>
+        <location filename="patchrenumber.ui" line="109"/>
+        <source>Start from the first free address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="patchrenumber.ui" line="119"/>
         <source>Preview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="47"/>
+        <location filename="patchrenumber.cpp" line="48"/>
         <source>Selection order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="48"/>
+        <location filename="patchrenumber.cpp" line="49"/>
         <source>By address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="49"/>
+        <location filename="patchrenumber.cpp" line="50"/>
         <source>By name</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="patchrenumber.cpp" line="51"/>
+        <location filename="patchrenumber.cpp" line="52"/>
         <source>Assign sequential addresses to %n selected fixture(s).</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -4922,18 +5041,18 @@ Der Assistent kennt keinen Unterschied zwischen einem Schalter und einem Regler,
         </translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="115"/>
+        <location filename="patchrenumber.cpp" line="243"/>
         <source>%1 : skipped (invalid channel count)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="131"/>
+        <location filename="patchrenumber.cpp" line="247"/>
         <source>%1 : Universe %2, %3 - %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="patchrenumber.cpp" line="141"/>
-        <source>Not enough universes to complete the operation!</source>
+        <location filename="patchrenumber.cpp" line="256"/>
+        <source>Not enough space in the available universes to complete the operation!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

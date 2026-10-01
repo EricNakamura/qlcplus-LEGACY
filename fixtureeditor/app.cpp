@@ -39,30 +39,22 @@
 
 #include "qlcfixturedefcache.h"
 #include "qlcfixturedef.h"
-#include "qlcchannel.h"
 #include "qlcconfig.h"
-#include "qlcfile.h"
-#include "avolitesd4parser.h"
 
 #include "app.h"
 #include "aboutbox.h"
+#include "fixturedefio.h"
 #include "fixtureeditor.h"
 
 #define SETTINGS_GEOMETRY "workspace/geometry"
 #define SETTINGS_OPENDIALOGSTATE "workspace/opendialog"
 #define SETTINGS_WORKINGPATH "workspace/workingpath"
 
-App *_app;
-
 App::App(QWidget *parent) : QMainWindow(parent)
 {
-    _app = this;
-
     m_fileMenu = NULL;
     m_helpMenu = NULL;
     m_toolBar = NULL;
-
-    m_copyChannel = NULL;
 
     setWindowTitle(App::longName());
     setWindowIcon(QIcon(":/qlcplus-fixtureeditor.png"));
@@ -97,11 +89,6 @@ App::~App()
 {
     QSettings settings;
     settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
-
-    setCopyChannel(NULL);
-
-    // Remove the reference to the application
-    _app = NULL;
 }
 
 QString App::longName()
@@ -116,16 +103,9 @@ QString App::version()
 
 void App::loadFixtureDefinition(const QString& path)
 {
-    QLCFixtureDef *fixtureDef = NULL;
-
     /* Attempt to create a fixture definition from the selected file */
-    QString error(tr("Unrecognized file extension: %1").arg(path));
-    if (path.endsWith(KExtFixture, Qt::CaseInsensitive) == true)
-        fixtureDef = loadQXF(path, error);
-    else if (path.endsWith(KExtAvolitesFixture, Qt::CaseInsensitive) == true)
-        fixtureDef = loadD4(path, error);
-    else
-        fixtureDef = NULL;
+    QString error;
+    QLCFixtureDef* fixtureDef = FixtureDefIO::load(path, error);
 
     if (fixtureDef != NULL)
     {
@@ -150,37 +130,6 @@ void App::loadFixtureDefinition(const QString& path)
         QMessageBox::warning(this, tr("Fixture loading failed"),
                              tr("Unable to load fixture definition: ") + error);
     }
-}
-
-QLCFixtureDef *App::loadQXF(const QString& path, QString& errorMsg) const
-{
-    QLCFixtureDef *fixtureDef = new QLCFixtureDef;
-    Q_ASSERT(fixtureDef != NULL);
-
-    QFile::FileError error = fixtureDef->loadXML(path);
-    if (error != QFile::NoError)
-    {
-        delete fixtureDef;
-        fixtureDef = NULL;
-        errorMsg = QLCFile::errorString(error);
-    }
-
-    return fixtureDef;
-}
-
-QLCFixtureDef *App::loadD4(const QString& path, QString& errorMsg) const
-{
-    QLCFixtureDef *fixtureDef = new QLCFixtureDef;
-
-    AvolitesD4Parser parser;
-    if (parser.loadXML(path, fixtureDef) == false)
-    {
-        errorMsg = parser.lastError();
-        delete fixtureDef;
-        fixtureDef = NULL;
-    }
-
-    return fixtureDef;
 }
 
 void App::closeEvent(QCloseEvent *e)
@@ -211,27 +160,6 @@ void App::closeEvent(QCloseEvent *e)
             break;
         }
     }
-}
-
-/*****************************************************************************
- * Copy channel
- *****************************************************************************/
-
-void App::setCopyChannel(QLCChannel *ch)
-{
-    if (m_copyChannel != NULL)
-        delete m_copyChannel;
-    m_copyChannel = NULL;
-
-    if (ch != NULL)
-        m_copyChannel = ch->createCopy();
-
-    emit clipboardChanged();
-}
-
-QLCChannel *App::copyChannel() const
-{
-    return m_copyChannel;
 }
 
 /*****************************************************************************

@@ -22,6 +22,7 @@
 
 #include <QDialog>
 #include <QList>
+#include <QPair>
 
 #include "ui_patchrenumber.h"
 
@@ -35,6 +36,8 @@ class Doc;
 /**
  * Assign sequential DMX addresses (with an optional gap) to a list of
  * fixtures, showing a live preview before applying the changes.
+ * Addresses can be assigned from a given position, or by searching the
+ * first free space available in the universes (packing).
  */
 class PatchRenumber final : public QDialog, public Ui_PatchRenumber
 {
@@ -45,6 +48,12 @@ public:
     PatchRenumber(Doc* doc, const QList <quint32>& fixtures, QWidget* parent = 0);
     ~PatchRenumber();
 
+    /** Sort the fixtures by their current address */
+    void setOrderByAddress();
+
+    /** Set the start position. $address is 1-based */
+    void setStart(int universe, int address);
+
 protected slots:
     /** Rebuild the address preview according to the current options */
     void slotUpdatePreview();
@@ -52,9 +61,24 @@ protected slots:
     /** Apply the new addresses */
     void accept() override;
 
+private slots:
+    /** Handle the "first free address" option */
+    void slotFirstFreeToggled(bool checked);
+
 private:
     /** Get the fixtures in the order selected by the user */
     QList <quint32> orderedFixtures() const;
+
+    /**
+     * Compute the new position of every fixture, in the selected order.
+     * When $firstFree is true, the first free address range is searched,
+     * skipping the addresses used by other fixtures. $ok is set to false
+     * when there is not enough space in the available universes.
+     */
+    QList <QPair <quint32, quint32> > computePlacements(bool firstFree, bool& ok) const;
+
+    /** Enable/disable the OK button according to the last computation */
+    void updateAcceptButton(bool valid);
 
 private:
     Doc* m_doc;

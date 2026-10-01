@@ -50,13 +50,13 @@
 #endif
 
 #include "fixtureeditor.h"
+#include "fixturedefio.h"
+#include "fixtureeditorclipboard.h"
 #include "editphysical.h"
 #include "editchannel.h"
 #include "editmode.h"
 #include "util.h"
-#include "app.h"
 
-extern App *_app;
 extern int errno;
 
 #define PROP_PTR Qt::UserRole
@@ -84,7 +84,8 @@ QLCFixtureEditor::QLCFixtureEditor(QWidget *parent, QLCFixtureDef *fixtureDef,
     setModified(false);
 
     /* Connect to be able to enable/disable clipboard actions */
-    connect(_app, SIGNAL(clipboardChanged()), this, SLOT(slotClipboardChanged()));
+    connect(FixtureEditorClipboard::instance(), SIGNAL(changed()),
+            this, SLOT(slotClipboardChanged()));
 
     /* Initial update to clipboard actions */
     slotClipboardChanged();
@@ -201,29 +202,30 @@ void QLCFixtureEditor::init()
 
 void QLCFixtureEditor::closeEvent(QCloseEvent *e)
 {
-    if (m_modified)
-    {
-        int r = QMessageBox::information(this, tr("Close"),
-                                     tr("Do you want to save changes to fixture\n\""
-                                        "%1\"\nbefore closing?").arg(m_fixtureDef->name()),
-                                     QMessageBox::Yes |
-                                     QMessageBox::No |
-                                     QMessageBox::Cancel);
-
-        if (r == QMessageBox::Yes)
-            if (save())
-                e->accept();
-            else
-                e->ignore();
-        else if (r == QMessageBox::No)
-            e->accept();
-        else
-            e->ignore();
-    }
-    else
-    {
+    if (requestClose() == true)
         e->accept();
-    }
+    else
+        e->ignore();
+}
+
+bool QLCFixtureEditor::requestClose()
+{
+    if (m_modified == false)
+        return true;
+
+    int r = QMessageBox::information(this, tr("Close"),
+                                 tr("Do you want to save changes to fixture\n\""
+                                    "%1\"\nbefore closing?").arg(m_fixtureDef->name()),
+                                 QMessageBox::Yes |
+                                 QMessageBox::No |
+                                 QMessageBox::Cancel);
+
+    if (r == QMessageBox::Yes)
+        return save();
+    else if (r == QMessageBox::No)
+        return true;
+
+    return false;
 }
 
 bool QLCFixtureEditor::checkManufacturerModel()
@@ -270,6 +272,7 @@ bool QLCFixtureEditor::save()
         if (error == QFile::NoError)
         {
             setModified(false);
+            emit definitionSaved(m_fixtureDef);
             return true;
         }
         else
@@ -329,6 +332,7 @@ bool QLCFixtureEditor::saveAs()
             m_fileName = path;
             setCaption();
             setModified(false);
+            emit definitionSaved(m_fixtureDef);
             return true;
         }
         else
@@ -353,6 +357,11 @@ void QLCFixtureEditor::setFileName(QString path)
 QString QLCFixtureEditor::fileName() const
 {
     return m_fileName;
+}
+
+QLCFixtureDef* QLCFixtureEditor::fixtureDefinition() const
+{
+    return m_fixtureDef;
 }
 
 bool QLCFixtureEditor::modified() const
@@ -570,12 +579,12 @@ void QLCFixtureEditor::slotEditChannel()
 
 void QLCFixtureEditor::slotCopyChannel()
 {
-    _app->setCopyChannel(currentChannel());
+    FixtureEditorClipboard::instance()->setChannel(currentChannel());
 }
 
 void QLCFixtureEditor::slotPasteChannel()
 {
-    QLCChannel *ch = _app->copyChannel();
+    QLCChannel *ch = FixtureEditorClipboard::instance()->channel();
     if (ch != NULL && m_fixtureDef != NULL)
     {
         /* Create new mode and an item for it */
@@ -691,7 +700,7 @@ void QLCFixtureEditor::slotChannelListContextMenuRequested()
         removeAction.setEnabled(false);
     }
 
-    if (_app->copyChannel() == NULL)
+    if (FixtureEditorClipboard::instance()->channel() == NULL)
         pasteAction.setEnabled(false);
 
     QAction *selectedAction = menu.exec(QCursor::pos());
@@ -762,7 +771,7 @@ void QLCFixtureEditor::slotModeListSelectionChanged(QTreeWidgetItem *item)
 
 void QLCFixtureEditor::slotAddMode()
 {
-    EditMode em(_app, m_fixtureDef);
+    EditMode em(this, m_fixtureDef);
     connect(&em, SIGNAL(copyToClipboard(QLCPhysical)),
             this, SLOT(slotCopyPhysicalClipboard(QLCPhysical)));
 
@@ -1218,7 +1227,7 @@ void QLCFixtureEditor::slotRemoveAliasClicked()
 
 void QLCFixtureEditor::slotClipboardChanged()
 {
-    if (_app->copyChannel() != NULL)
+    if (FixtureEditorClipboard::instance()->channel() != NULL)
         m_pasteChannelButton->setEnabled(true);
     else
         m_pasteChannelButton->setEnabled(false);

@@ -37,6 +37,8 @@ private slots:
     void fixtureData();
     void setAddress();
     void patchGridGeometry();
+    void fixtureInspector();
+    void patchRenumber();
 
 private:
     Doc* m_doc;

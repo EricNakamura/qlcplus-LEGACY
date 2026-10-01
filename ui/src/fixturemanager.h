@@ -29,6 +29,7 @@
 
 class QLCFixtureDefCache;
 class FixtureGroupEditor;
+class FixtureInspector;
 class FixturePatchModel;
 class FixtureTreeWidget;
 class PatchGridWidget;
@@ -204,20 +205,11 @@ private slots:
     void slotPatchSearchChanged(const QString& filter);
     void slotPatchOverlapDetected(quint32 id, const QList <quint32>& others);
     void slotPatchRenumber();
+    void slotPatchRepack();
 
 private:
     /** Select a fixture group */
     void selectGroup(quint32 id);
-
-    /** Get a CSS style sheet & HTML header for fixture info */
-    QString fixtureInfoStyleSheetHeader() const;
-
-    /**
-     * Get the fixture instance's status info for Fixture Manager
-     *
-     * @return A sort-of HTML-RTF-gibberish for Fixture Manager
-     */
-    QString fixtureInfo(const Fixture *fixture) const;
 
     /** Get a CSS style sheet & HTML header for channels group info */
     QString channelsGroupInfoStyleSheetHeader() const;
@@ -248,6 +240,7 @@ private:
 
     QTextBrowser* m_info;
     FixtureGroupEditor* m_groupEditor;
+    FixtureInspector* m_inspector;
     int m_currentTabIndex;
 
     /********************************************************************
@@ -288,6 +281,12 @@ private slots:
     void slotImport();
     void slotExport();
 
+    /** Create a new fixture definition in the embedded editor */
+    void slotNewFixtureDefinition();
+
+    /** Edit the selected fixture's definition in the embedded editor */
+    void slotEditFixtureDefinition();
+
     /** Callback for right mouse button clicks over a fixture item */
     void slotContextMenuRequested(const QPoint& pos);
 
@@ -301,6 +300,8 @@ private:
     QAction* m_groupAction;
     QAction* m_unGroupAction;
     QAction* m_newGroupAction;
+    QAction* m_newDefAction;
+    QAction* m_editDefAction;
 
     QAction* m_moveUpAction;
     QAction* m_moveDownAction;
@@ -313,6 +314,7 @@ private:
     QAction* m_orientAction;
     QAction* m_expandAction;
     QAction* m_renumberAction;
+    QAction* m_repackAction;
 
     QMenu* m_groupMenu;
 };

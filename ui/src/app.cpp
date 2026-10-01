@@ -35,6 +35,8 @@
 #include "inputoutputmap.h"
 #include "virtualconsole.h"
 #include "fixturemanager.h"
+#include "fixtureeditordialog.h"
+#include "fixturedefwatcher.h"
 #include "dmxdumpfactory.h"
 #include "showmanager.h"
 #include "mastertimer.h"
@@ -379,6 +381,13 @@ void App::closeEvent(QCloseEvent* e)
         return;
     }
 
+    /* Give the open fixture definition editors the chance to save their work */
+    if (FixtureEditorDialog::closeAll() == false)
+    {
+        e->ignore();
+        return;
+    }
+
     if (m_doc->isKiosk() == false)
     {
         if (saveModifiedDoc(tr("Close"), tr("Do you wish to save the current workspace " \
@@ -482,6 +491,10 @@ void App::initDoc()
     /* Load user fixtures first so that they override system fixtures */
     m_doc->fixtureDefCache()->load(QLCFixtureDefCache::userDefinitionDirectory());
     m_doc->fixtureDefCache()->loadMap(QLCFixtureDefCache::systemDefinitionDirectory());
+
+    /* Watch the user fixtures directory, so that definitions created or
+       modified while QLC+ is running are picked up without a restart */
+    new FixtureDefWatcher(this, m_doc);
 
     /* Load channel modifiers templates */
     m_doc->modifiersCache()->load(QLCModifiersCache::systemTemplateDirectory(), true);

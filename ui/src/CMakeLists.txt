@@ -51,7 +51,11 @@ add_library(${module_name}
     efxeditor.cpp efxeditor.h efxeditor.ui
     efxpreviewarea.cpp efxpreviewarea.h
     fixtureconsole.cpp fixtureconsole.h
+    fixturedefutils.cpp fixturedefutils.h
+    fixturedefwatcher.cpp fixturedefwatcher.h
+    fixtureeditordialog.cpp fixtureeditordialog.h
     fixturegroupeditor.cpp fixturegroupeditor.h fixturegroupeditor.ui
+    fixtureinspector.cpp fixtureinspector.h fixtureinspector.ui
     fixturemanager.cpp fixturemanager.h
     fixturepatchmodel.cpp fixturepatchmodel.h
     fixtureremap.cpp fixtureremap.h fixtureremap.ui
@@ -155,6 +159,7 @@ add_library(${module_name}
 target_include_directories(${module_name} PUBLIC
     ../../engine/audio/src
     ../../engine/src
+    ../../fixtureeditor
     ../../plugins/interfaces
     ../../webaccess
     monitor
@@ -171,6 +176,7 @@ target_link_libraries(${module_name} PUBLIC
     Qt${QT_MAJOR_VERSION}::MultimediaWidgets
     Qt${QT_MAJOR_VERSION}::Widgets
     qlcplusengine
+    qlcplusfixtureeditor
 )
 
 # Add resources and RGB Script deps

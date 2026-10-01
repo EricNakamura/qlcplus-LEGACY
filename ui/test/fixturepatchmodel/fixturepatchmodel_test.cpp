@@ -22,6 +22,10 @@
 
 #include "fixturepatchmodel.h"
 #include "patchgridwidget.h"
+#define private public
+#include "fixtureinspector.h"
+#include "patchrenumber.h"
+#undef private
 #include "qlcfixturemode.h"
 #include "qlcfixturedef.h"
 #include "fixture.h"
@@ -198,6 +202,91 @@ void FixturePatchModel_Test::patchGridGeometry()
        starts the second column, on the first row */
     grid.setOrientation(PatchGridWidget::ColumnMajor);
     QCOMPARE(grid.cellRect(16), QRect(28 + 22, 16, 21, 21));
+}
+
+void FixturePatchModel_Test::fixtureInspector()
+{
+    Fixture* f1 = new Fixture(m_doc);
+    f1->setName("One");
+    f1->setChannels(5);
+    f1->setAddress(0);
+    f1->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f1) == true);
+
+    FixtureInspector inspector(m_doc);
+    inspector.setFixture(f1->id());
+
+    QCOMPARE(inspector.fixtureId(), f1->id());
+    QCOMPARE(inspector.m_nameLabel->text(), QString("One"));
+    QCOMPARE(inspector.m_addressLabel->text(), QString("1 - 5"));
+    QCOMPARE(inspector.m_channelsLabel->text(), QString("5"));
+    QCOMPARE(inspector.m_channelsTable->rowCount(), 5);
+    QCOMPARE(inspector.m_channelsTable->item(0, 3)->text(), QString("1"));
+    QCOMPARE(inspector.m_channelsTable->item(4, 3)->text(), QString("5"));
+    QCOMPARE(inspector.m_warningLabel->text().isEmpty(), true);
+    QVERIFY(inspector.m_detailsLabel->text().isEmpty() == false);
+
+    /* An overlapping fixture is reported in the warning area */
+    Fixture* f2 = new Fixture(m_doc);
+    f2->setName("Two");
+    f2->setChannels(3);
+    f2->setAddress(2);
+    f2->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f2) == true);
+
+    inspector.updateContents();
+    QVERIFY(inspector.m_warningLabel->text().contains("Two") == true);
+
+    /* Clearing the view works too */
+    inspector.setFixture(Fixture::invalidId());
+    QCOMPARE(inspector.m_channelsTable->rowCount(), 0);
+    QVERIFY(inspector.m_nameLabel->text().isEmpty() == true);
+}
+
+void FixturePatchModel_Test::patchRenumber()
+{
+    Fixture* f1 = new Fixture(m_doc);
+    f1->setName("One");
+    f1->setChannels(4);
+    f1->setAddress(0);
+    f1->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f1) == true);
+
+    Fixture* f2 = new Fixture(m_doc);
+    f2->setName("Two");
+    f2->setChannels(2);
+    f2->setAddress(10);
+    f2->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f2) == true);
+
+    /* A foreign fixture occupying channels 2-4 */
+    Fixture* f3 = new Fixture(m_doc);
+    f3->setName("Foreign");
+    f3->setChannels(3);
+    f3->setAddress(2);
+    f3->setUniverse(0);
+    QVERIFY(m_doc->addFixture(f3) == true);
+
+    QList <quint32> selection;
+    selection << f1->id() << f2->id();
+
+    PatchRenumber dlg(m_doc, selection);
+    dlg.setOrderByAddress();
+    dlg.setStart(0, 100);
+
+    /* Fixed start: the fixtures are placed sequentially from address 99 */
+    bool ok = false;
+    QList <QPair <quint32, quint32> > placements = dlg.computePlacements(false, ok);
+    QVERIFY(ok == true);
+    QCOMPARE(placements.count(), 2);
+    QCOMPARE(placements.at(0), qMakePair(quint32(0), quint32(99)));
+    QCOMPARE(placements.at(1), qMakePair(quint32(0), quint32(103)));
+
+    /* First free: channels 2-4 are busy, so channel 5 is the first fit */
+    placements = dlg.computePlacements(true, ok);
+    QVERIFY(ok == true);
+    QCOMPARE(placements.at(0), qMakePair(quint32(0), quint32(5)));
+    QCOMPARE(placements.at(1), qMakePair(quint32(0), quint32(9)));
 }
 
 QTEST_MAIN(FixturePatchModel_Test)

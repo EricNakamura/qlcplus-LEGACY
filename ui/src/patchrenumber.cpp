@@ -17,7 +17,11 @@
   limitations under the License.
 */
 
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QCheckBox>
 #include <QDebug>
+#include <QSet>
 #include <algorithm>
 
 #include "universe.h"
@@ -51,12 +55,44 @@ PatchRenumber::PatchRenumber(Doc* doc, const QList <quint32>& fixtures, QWidget*
     connect(m_gapSpin, SIGNAL(valueChanged(int)), this, SLOT(slotUpdatePreview()));
     connect(m_universeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotUpdatePreview()));
     connect(m_orderCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotUpdatePreview()));
+    connect(m_firstFreeCheck, SIGNAL(toggled(bool)), this, SLOT(slotFirstFreeToggled(bool)));
 
     slotUpdatePreview();
 }
 
 PatchRenumber::~PatchRenumber()
 {
+}
+
+void PatchRenumber::setOrderByAddress()
+{
+    m_orderCombo->setCurrentIndex(KOrderAddress);
+}
+
+void PatchRenumber::setStart(int universe, int address)
+{
+    if (universe >= 0 && universe < m_universeCombo->count())
+        m_universeCombo->setCurrentIndex(universe);
+
+    if (m_firstFreeCheck->isChecked() == true)
+        m_firstFreeCheck->setChecked(false);
+
+    m_addressSpin->setValue(qBound(1, address, 512));
+}
+
+void PatchRenumber::slotFirstFreeToggled(bool checked)
+{
+    m_universeCombo->setEnabled(checked == false);
+    m_addressSpin->setEnabled(checked == false);
+
+    slotUpdatePreview();
+}
+
+void PatchRenumber::updateAcceptButton(bool valid)
+{
+    QPushButton* okButton = buttonBox->button(QDialogButtonBox::Ok);
+    if (okButton != NULL)
+        okButton->setEnabled(valid);
 }
 
 QList <quint32> PatchRenumber::orderedFixtures() const
@@ -91,85 +127,167 @@ QList <quint32> PatchRenumber::orderedFixtures() const
     return list;
 }
 
-void PatchRenumber::slotUpdatePreview()
+QList <QPair <quint32, quint32> > PatchRenumber::computePlacements(bool firstFree, bool& ok) const
 {
-    QStringList lines;
+    QList <QPair <quint32, quint32> > placements;
+
+    /* Build the occupancy of all the fixtures that are NOT being moved */
+    QSet <quint32> occupied;
+    if (firstFree == true)
+    {
+        foreach (Fixture* fxi, m_doc->fixtures())
+        {
+            if (fxi == NULL || m_fixtures.contains(fxi->id()) == true)
+                continue;
+
+            for (quint32 c = 0; c < fxi->channels(); c++)
+                occupied.insert(fxi->universeAddress() + c);
+        }
+    }
+
     quint32 universe = m_universeCombo->currentIndex();
-    quint32 address = m_addressSpin->value() - 1;
+    quint32 address = firstFree ? 0 : quint32(m_addressSpin->value() - 1);
     int gap = m_gapSpin->value();
     quint32 universeCount = m_doc->inputOutputMap()->universesCount();
-    bool overflow = false;
+
+    ok = true;
 
     foreach (quint32 id, orderedFixtures())
     {
         Fixture* fxi = m_doc->fixture(id);
+        quint32 channels = fxi != NULL ? fxi->channels() : 0;
+
+        if (fxi == NULL || channels == 0 || channels > UNIVERSE_SIZE)
+        {
+            placements << qMakePair(quint32(UINT_MAX), quint32(UINT_MAX));
+            continue;
+        }
+
+        bool found = false;
+        while (true)
+        {
+            if (universe >= universeCount)
+                break;
+
+            if (address + channels > UNIVERSE_SIZE)
+            {
+                universe++;
+                address = 0;
+                continue;
+            }
+
+            /* With a fixed start position, overlapping addresses are allowed.
+               When searching free space, skip the occupied ones instead */
+            if (firstFree == false)
+            {
+                found = true;
+                break;
+            }
+
+            bool free = true;
+            for (quint32 c = 0; c < channels; c++)
+            {
+                if (occupied.contains((universe * UNIVERSE_SIZE) + address + c) == true)
+                {
+                    free = false;
+                    break;
+                }
+            }
+
+            if (free == true)
+            {
+                found = true;
+                break;
+            }
+
+            address++;
+        }
+
+        if (found == false)
+        {
+            ok = false;
+            placements << qMakePair(quint32(UINT_MAX), quint32(UINT_MAX));
+            break;
+        }
+
+        placements << qMakePair(universe, address);
+
+        for (quint32 c = 0; c < channels; c++)
+            occupied.insert((universe * UNIVERSE_SIZE) + address + c);
+
+        address += channels + gap;
+    }
+
+    return placements;
+}
+
+void PatchRenumber::slotUpdatePreview()
+{
+    bool ok = true;
+    bool firstFree = m_firstFreeCheck->isChecked();
+    QList <QPair <quint32, quint32> > placements = computePlacements(firstFree, ok);
+    QList <quint32> order = orderedFixtures();
+    QStringList lines;
+
+    for (int i = 0; i < placements.count() && i < order.count(); i++)
+    {
+        Fixture* fxi = m_doc->fixture(order.at(i));
         if (fxi == NULL)
             continue;
 
-        quint32 channels = fxi->channels();
-        if (channels == 0 || channels > UNIVERSE_SIZE)
+        quint32 universe = placements.at(i).first;
+        quint32 address = placements.at(i).second;
+
+        if (universe == UINT_MAX)
         {
             lines << tr("%1 : skipped (invalid channel count)").arg(fxi->name());
             continue;
-        }
-
-        if (address + channels > UNIVERSE_SIZE)
-        {
-            universe++;
-            address = 0;
-        }
-
-        if (universe >= universeCount)
-        {
-            overflow = true;
-            break;
         }
 
         lines << tr("%1 : Universe %2, %3 - %4")
                     .arg(fxi->name())
                     .arg(universe + 1)
                     .arg(address + 1)
-                    .arg(address + channels);
-
-        address += channels + gap;
+                    .arg(address + fxi->channels());
     }
 
-    if (overflow == true)
-        lines << tr("Not enough universes to complete the operation!");
+    if (ok == false)
+    {
+        lines << tr("Not enough space in the available universes to complete the operation!");
+        updateAcceptButton(false);
+    }
+    else
+    {
+        updateAcceptButton(true);
+    }
 
     m_preview->setPlainText(lines.join("\n"));
 }
 
 void PatchRenumber::accept()
 {
-    quint32 universe = m_universeCombo->currentIndex();
-    quint32 address = m_addressSpin->value() - 1;
-    int gap = m_gapSpin->value();
-    quint32 universeCount = m_doc->inputOutputMap()->universesCount();
+    bool ok = true;
+    QList <QPair <quint32, quint32> > placements = computePlacements(m_firstFreeCheck->isChecked(), ok);
 
-    foreach (quint32 id, orderedFixtures())
+    if (ok == false)
+        return;
+
+    QList <quint32> order = orderedFixtures();
+
+    for (int i = 0; i < placements.count() && i < order.count(); i++)
     {
-        Fixture* fxi = m_doc->fixture(id);
+        Fixture* fxi = m_doc->fixture(order.at(i));
         if (fxi == NULL)
             continue;
 
-        quint32 channels = fxi->channels();
-        if (channels == 0 || channels > UNIVERSE_SIZE)
+        quint32 universe = placements.at(i).first;
+        quint32 address = placements.at(i).second;
+
+        if (universe == UINT_MAX)
             continue;
-
-        if (address + channels > UNIVERSE_SIZE)
-        {
-            universe++;
-            address = 0;
-        }
-
-        if (universe >= universeCount)
-            break;
 
         fxi->setUniverse(universe);
         fxi->setAddress(address);
-
-        address += channels + gap;
     }
 
     QDialog::accept();

@@ -1730,16 +1730,18 @@ QVariantList FixtureManager::fixtureNamesMap()
 QString FixtureManager::getTooltip(quint32 address)
 {
     quint32 uniFilter = m_universeFilter == Universe::invalid() ? 0 : m_universeFilter;
+    QList <quint32> fxIDs = m_doc->fixturesAtAddress((uniFilter << 9) | address);
 
-    quint32 fxID = m_doc->fixtureForAddress((uniFilter << 9) | address);
-    if (fxID == Fixture::invalidId())
-        return "";
+    /* Report all the fixtures sharing the same channel, primary first */
+    QStringList names;
+    foreach (quint32 fxID, fxIDs)
+    {
+        Fixture *fixture = m_doc->fixture(fxID);
+        if (fixture != nullptr)
+            names << fixture->name();
+    }
 
-    Fixture *fixture = m_doc->fixture(fxID);
-    if (fixture == nullptr)
-        return "";
-
-    return fixture->name();
+    return names.join(", ");
 }
 
 QVariantList FixtureManager::fixturesMap()

@@ -19,17 +19,49 @@ else()
     qt5_add_translation(QM_FILES ${TS_FILES})
 endif()
 
-add_executable(${module_name} WIN32
-    ../ui/src/aboutbox.cpp ../ui/src/aboutbox.h ../ui/src/aboutbox.ui
-    ../ui/src/apputil.cpp ../ui/src/apputil.h
+# The fixture editor widget is built as a shared (static) library so that it
+# can be used both by the standalone fixture editor application and by the
+# fixture editor embedded in the QLC+ main application.
+add_library(qlcplusfixtureeditor STATIC
     addchannelsdialog.cpp addchannelsdialog.h addchannelsdialog.ui
-    app.cpp app.h
     capabilitywizard.cpp capabilitywizard.h capabilitywizard.ui
     editchannel.cpp editchannel.h editchannel.ui
     edithead.cpp edithead.h edithead.ui
     editmode.cpp editmode.h editmode.ui
     editphysical.cpp editphysical.h editphysical.ui
+    fixturedefio.cpp fixturedefio.h
     fixtureeditor.cpp fixtureeditor.h fixtureeditor.ui
+    fixtureeditorclipboard.cpp fixtureeditorclipboard.h
+)
+
+set_target_properties(qlcplusfixtureeditor PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# Consumers including fixtureeditor.h need this target's AUTOUIC-generated
+# headers (ui_fixtureeditor.h and friends)
+target_include_directories(qlcplusfixtureeditor PUBLIC
+    ${CMAKE_CURRENT_BINARY_DIR}/qlcplusfixtureeditor_autogen/include
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/qlcplusfixtureeditor_autogen/include_$<CONFIG>>
+)
+
+target_include_directories(qlcplusfixtureeditor PUBLIC
+    ../engine/src
+    ../plugins/interfaces
+    ../ui/src
+)
+
+target_link_libraries(qlcplusfixtureeditor PUBLIC
+    Qt${QT_MAJOR_VERSION}::Core
+    Qt${QT_MAJOR_VERSION}::Gui
+    Qt${QT_MAJOR_VERSION}::Widgets
+    qlcplusengine
+)
+
+if(QLC_BUILD_FXE)
+
+add_executable(${module_name} WIN32
+    ../ui/src/aboutbox.cpp ../ui/src/aboutbox.h ../ui/src/aboutbox.ui
+    ../ui/src/apputil.cpp ../ui/src/apputil.h
+    app.cpp app.h
     main.cpp
     util.h
     ${QM_FILES}
@@ -46,6 +78,7 @@ target_link_libraries(${module_name} PRIVATE
     Qt${QT_MAJOR_VERSION}::Gui
     Qt${QT_MAJOR_VERSION}::Widgets
     qlcplusengine
+    qlcplusfixtureeditor
 )
 
 
@@ -633,4 +666,6 @@ endif()
 install(TARGETS ${module_name}
     DESTINATION ${INSTALLROOT}/${BINDIR}
 )
+
+endif()
 

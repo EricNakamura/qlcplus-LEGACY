@@ -28,6 +28,7 @@
 #include <QMessageBox>
 #include <QToolButton>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QTabWidget>
 #include <QSplitter>
 #include <QToolBar>
@@ -54,11 +55,13 @@
 #include "fixturepatchmodel.h"
 #include "patchgridwidget.h"
 #include "patchrenumber.h"
+#include "fixtureinspector.h"
 #include "createfixturegroup.h"
 #include "fixturegroupeditor.h"
 #include "fixturetreewidget.h"
 #include "channelsselection.h"
 #include "addchannelsgroup.h"
+#include "fixtureeditordialog.h"
 #include "fixturemanager.h"
 #include "fixtureremap.h"
 #include "addrgbpanel.h"
@@ -105,6 +108,7 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc)
     , m_statusLabel(NULL)
     , m_info(NULL)
     , m_groupEditor(NULL)
+    , m_inspector(NULL)
     , m_currentTabIndex(KPatchTab)
     , m_addAction(NULL)
     , m_addRGBAction(NULL)
@@ -115,6 +119,8 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc)
     , m_groupAction(NULL)
     , m_unGroupAction(NULL)
     , m_newGroupAction(NULL)
+    , m_newDefAction(NULL)
+    , m_editDefAction(NULL)
     , m_moveUpAction(NULL)
     , m_moveDownAction(NULL)
     , m_importAction(NULL)
@@ -124,6 +130,7 @@ FixtureManager::FixtureManager(QWidget* parent, Doc* doc)
     , m_orientAction(NULL)
     , m_expandAction(NULL)
     , m_renumberAction(NULL)
+    , m_repackAction(NULL)
     , m_groupMenu(NULL)
 {
     Q_ASSERT(s_instance == NULL);
@@ -235,14 +242,15 @@ void FixtureManager::slotFixtureRemoved(quint32 id)
     if (m_patchGrid != NULL)
         m_patchGrid->refresh();
 
+    if (m_inspector != NULL && m_inspector->fixtureId() == id)
+        m_inspector->setFixture(Fixture::invalidId());
+
     updatePatchSummary();
     slotModeChanged(m_doc->mode());
 }
 
 void FixtureManager::slotFixtureChanged(quint32 id)
 {
-    Q_UNUSED(id)
-
     /* Keep the patch views in sync with changes coming from the engine
        (addresses edited in the table, dragged in the matrix, etc.) */
     if (m_patchGrid != NULL)
@@ -250,6 +258,9 @@ void FixtureManager::slotFixtureChanged(quint32 id)
 
     if (m_patchTable != NULL)
         m_patchTable->viewport()->update();
+
+    if (m_inspector != NULL && m_inspector->fixtureId() == id)
+        m_inspector->updateContents();
 
     updatePatchSummary();
 }
@@ -282,6 +293,20 @@ void FixtureManager::slotModeChanged(Doc::Mode mode)
                                           (channelsTab && chanGroupCount > 0)));
     m_propertiesAction->setEnabled(design && (fxiCount == 1 ||
                                               (channelsTab && chanGroupCount == 1)));
+
+    /* A fixture definition can be edited when exactly one non-generic
+       fixture is selected */
+    bool canEditDef = false;
+    if (design == true && fxiCount == 1)
+    {
+        Fixture* fxi = m_doc->fixture(selectedFixtures().first());
+        if (fxi != NULL && fxi->fixtureDef() != NULL &&
+            fxi->fixtureDef()->manufacturer() != KXMLFixtureGeneric)
+            canEditDef = true;
+    }
+    m_newDefAction->setEnabled(design);
+    m_editDefAction->setEnabled(canEditDef);
+
     m_fadeConfigAction->setEnabled(design && hasFixtures && channelsTab == false);
     m_groupAction->setEnabled(design && fxiCount > 0 && channelsTab == false);
     m_unGroupAction->setEnabled(design && fxiCount > 0 && channelsTab == false);
@@ -289,6 +314,7 @@ void FixtureManager::slotModeChanged(Doc::Mode mode)
     m_exportAction->setEnabled(design && hasFixtures && channelsTab == false);
     m_remapAction->setEnabled(design && hasFixtures && channelsTab == false);
     m_renumberAction->setEnabled(design && fxiCount > 0 && channelsTab == false);
+    m_repackAction->setEnabled(design && hasFixtures && channelsTab == false);
     m_moveUpAction->setEnabled(design && channelsTab && chanGroupCount > 0);
     m_moveDownAction->setEnabled(design && channelsTab && chanGroupCount > 0);
 }
@@ -792,12 +818,31 @@ void FixtureManager::fixtureSelected(quint32 id)
     if (fxi == NULL)
         return;
 
-    if (m_info == NULL)
-        createInfo();
+    if (m_inspector == NULL)
+    {
+        QByteArray state = m_splitter->saveState();
 
-    m_info->setText(QString("%1<BODY>%2</BODY></HTML>")
-                    .arg(fixtureInfoStyleSheetHeader())
-                    .arg(fixtureInfo(fxi)));
+        if (m_info != NULL)
+        {
+            delete m_info;
+            m_info = NULL;
+        }
+
+        if (m_groupEditor != NULL)
+        {
+            delete m_groupEditor;
+            m_groupEditor = NULL;
+        }
+
+        m_inspector = new FixtureInspector(m_doc, this);
+        connect(m_inspector, SIGNAL(propertiesRequested()),
+                this, SLOT(slotProperties()));
+        m_splitter->addWidget(m_inspector);
+
+        m_splitter->restoreState(state);
+    }
+
+    m_inspector->setFixture(id);
 
     // Enable/disable actions
     slotModeChanged(m_doc->mode());
@@ -817,6 +862,12 @@ void FixtureManager::fixtureGroupSelected(FixtureGroup* grp)
     {
         delete m_groupEditor;
         m_groupEditor = NULL;
+    }
+
+    if (m_inspector != NULL)
+    {
+        delete m_inspector;
+        m_inspector = NULL;
     }
 
     m_groupEditor = new FixtureGroupEditor(grp, m_doc, this);
@@ -839,6 +890,12 @@ void FixtureManager::createInfo()
     {
         delete m_groupEditor;
         m_groupEditor = NULL;
+    }
+
+    if (m_inspector != NULL)
+    {
+        delete m_inspector;
+        m_inspector = NULL;
     }
 
     m_info = new QTextBrowser(this);
@@ -1051,10 +1108,14 @@ void FixtureManager::slotTableContextMenuRequested(const QPoint& pos)
     menu.addAction(m_propertiesAction);
     menu.addAction(m_removeAction);
     menu.addSeparator();
+    menu.addAction(m_newDefAction);
+    menu.addAction(m_editDefAction);
+    menu.addSeparator();
     menu.addAction(m_groupAction);
     menu.addAction(m_unGroupAction);
     menu.addSeparator();
     menu.addAction(m_renumberAction);
+    menu.addAction(m_repackAction);
     menu.exec(m_patchTable->viewport()->mapToGlobal(pos));
 }
 
@@ -1221,6 +1282,36 @@ void FixtureManager::slotPatchRenumber()
     }
 }
 
+void FixtureManager::slotPatchRepack()
+{
+    int universe = m_patchGrid->universe();
+
+    QList <quint32> ids;
+    foreach (Fixture* fxi, m_doc->fixtures())
+    {
+        if (fxi != NULL && fxi->universe() == quint32(universe))
+            ids << fxi->id();
+    }
+
+    if (ids.isEmpty() == true)
+    {
+        QMessageBox::information(this, tr("Repack universe"),
+            tr("There are no fixtures patched in the selected universe."));
+        return;
+    }
+
+    PatchRenumber dlg(m_doc, ids, this);
+    dlg.setWindowTitle(tr("Repack universe"));
+    dlg.setOrderByAddress();
+    dlg.setStart(universe, 1);
+
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        updateView();
+        selectFixtures(ids);
+    }
+}
+
 void FixtureManager::slotChannelsGroupSelectionChanged()
 {
     if (m_info == NULL)
@@ -1347,226 +1438,6 @@ void FixtureManager::selectGroup(quint32 id)
     }
 }
 
-QString FixtureManager::fixtureInfoStyleSheetHeader() const
-{
-    QString info;
-
-    QPalette pal;
-    QColor hlBack(pal.color(QPalette::Highlight));
-    QColor hlText(pal.color(QPalette::HighlightedText));
-
-    info += "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">";
-    info += "<HTML><HEAD></HEAD><STYLE>";
-    info += QString(".hilite {" \
-                    "   background-color: %1;" \
-                    "   color: %2;" \
-                    "   font-size: x-large;" \
-                    "}").arg(hlBack.name()).arg(hlText.name());
-    info += QString(".subhi {" \
-                    "   background-color: %1;" \
-                    "   color: %2;" \
-                    "   font-weight: bold;" \
-                    "}").arg(hlBack.name()).arg(hlText.name());
-    info += QString(".emphasis {" \
-                    "   font-weight: bold;" \
-                    "}");
-    info += QString(".tiny {"\
-                    "   font-size: small;" \
-                    "}");
-    info += QString(".author {" \
-                    "   font-weight: light;" \
-                    "   font-style: italic;" \
-                    "   text-align: right;" \
-                    "   font-size: small;"  \
-                    "}");
-    info += "</STYLE>";
-    return info;
-}
-
-QString FixtureManager::fixtureInfo(const Fixture *fixture) const
-{
-    QString info;
-
-    QString title("<TR><TD CLASS='hilite' COLSPAN='3'>%1</TD></TR>");
-    QString subTitle("<TR><TD CLASS='subhi' COLSPAN='3'>%1</TD></TR>");
-    QString genInfo("<TR><TD CLASS='emphasis'>%1</TD><TD COLSPAN='2'>%2</TD></TR>");
-
-    /********************************************************************
-     * General info
-     ********************************************************************/
-
-    info += "<TABLE COLS='3' WIDTH='100%'>";
-
-    if (fixture == NULL)
-    {
-        info += "</TABLE>";
-        return info;
-    }
-
-    // Fixture title
-    info += title.arg(fixture->name());
-
-    const QLCFixtureDef* fixtureDef = fixture->fixtureDef();
-    const QLCFixtureMode* fixtureMode = fixture->fixtureMode();
-
-    if (fixtureDef != NULL && fixtureMode != NULL)
-    {
-        // Manufacturer
-        info += genInfo.arg(tr("Manufacturer")).arg(fixtureDef->manufacturer());
-        info += genInfo.arg(tr("Model")).arg(fixtureDef->model());
-        info += genInfo.arg(tr("Mode")).arg(fixtureMode->name());
-        info += genInfo.arg(tr("Type")).arg(fixtureDef->typeToString(fixtureDef->type()));
-    }
-
-    // Universe
-    info += genInfo.arg(tr("Universe")).arg(fixture->universe() + 1);
-
-    // Address
-    QString range = QString("%1 - %2").arg(fixture->address() + 1).arg(fixture->address() + fixture->channels());
-    info += genInfo.arg(tr("Address Range")).arg(range);
-
-    // Channels
-    info += genInfo.arg(tr("Channels")).arg(fixture->channels());
-
-    // Overlapping addresses (allowed, but worth a warning)
-    QList <quint32> overlapping;
-    for (quint32 ch = 0; ch < fixture->channels(); ch++)
-    {
-        foreach (quint32 id, m_doc->fixturesAtAddress(fixture->universeAddress() + ch))
-        {
-            if (id != fixture->id() && overlapping.contains(id) == false)
-                overlapping << id;
-        }
-    }
-
-    if (overlapping.isEmpty() == false)
-    {
-        QStringList names;
-        foreach (quint32 id, overlapping)
-        {
-            Fixture* other = m_doc->fixture(id);
-            if (other != NULL)
-                names << other->name();
-        }
-
-        info += QString("<TR><TD CLASS='emphasis'>%1</TD><TD COLSPAN='2'>%2</TD></TR>")
-                .arg(tr("Overlaps with")).arg(names.join(", "));
-    }
-
-    // Binary address
-    QString binaryStr = QString("%1").arg(fixture->address() + 1, 10, 2, QChar('0'));
-    QString dipTable("<TABLE COLS='33' cellspacing='0'><TR><TD COLSPAN='33'><IMG SRC=\"" ":/ds_top.png\"></TD></TR>");
-    dipTable += "<TR><TD><IMG SRC=\"" ":/ds_border.png\"></TD><TD><IMG SRC=\"" ":/ds_border.png\"></TD>";
-    for (int i = 9; i >= 0; i--)
-    {
-        if (binaryStr.at(i) == '0')
-            dipTable += "<TD COLSPAN='3'><IMG SRC=\"" ":/ds_off.png\"></TD>";
-        else
-            dipTable += "<TD COLSPAN='3'><IMG SRC=\"" ":/ds_on.png\"></TD>";
-    }
-    dipTable += "<TD><IMG SRC=\"" ":/ds_border.png\"></TD></TR>";
-    dipTable += "<TR><TD COLSPAN='33'><IMG SRC=\"" ":/ds_bottom.png\"></TD></TR>";
-    dipTable += "</TABLE>";
-
-    info += genInfo.arg(tr("Binary Address (DIP)"))
-            .arg(QString("%1").arg(dipTable));
-
-    /********************************************************************
-     * Channels
-     ********************************************************************/
-
-    // Title row
-    info += QString("<TR><TD CLASS='subhi'>%1</TD>").arg(tr("Channel"));
-    info += QString("<TD CLASS='subhi'>%1</TD>").arg(tr("DMX"));
-    info += QString("<TD CLASS='subhi'>%1</TD></TR>").arg(tr("Name"));
-
-    // Fill table with the fixture's channels
-    for (quint32 ch = 0; ch < fixture->channels(); ch++)
-    {
-        QString chInfo("<TR><TD>%1</TD><TD>%2</TD><TD>%3</TD></TR>");
-        info += chInfo.arg(ch + 1).arg(fixture->address() + ch + 1)
-                .arg(fixture->channel(ch)->name());
-    }
-
-    /********************************************************************
-     * Extended device information
-     ********************************************************************/
-
-    if (fixtureMode != NULL)
-    {
-        const QLCPhysical physical = fixtureMode->physical();
-        info += title.arg(tr("Physical"));
-
-        float mmInch = 0.0393700787;
-        float kgLbs = 2.20462262;
-        QString mm("%1mm (%2\")");
-        QString kg("%1kg (%2 lbs)");
-        QString W("%1W");
-        info += genInfo.arg(tr("Width")).arg(mm.arg(physical.width()))
-                                        .arg(physical.width() * mmInch, 0, 'g', 4);
-        info += genInfo.arg(tr("Height")).arg(mm.arg(physical.height()))
-                                         .arg(physical.height() * mmInch, 0, 'g', 4);
-        info += genInfo.arg(tr("Depth")).arg(mm.arg(physical.depth()))
-                                        .arg(physical.depth() * mmInch, 0, 'g', 4);
-        info += genInfo.arg(tr("Weight")).arg(kg.arg(physical.weight()))
-                                         .arg(physical.weight() * kgLbs, 0, 'g', 4);
-        info += genInfo.arg(tr("Power consumption")).arg(W.arg(physical.powerConsumption()));
-        info += genInfo.arg(tr("DMX Connector")).arg(physical.dmxConnector());
-
-        // Bulb
-        QString K("%1K");
-        QString lm("%1lm");
-        info += subTitle.arg(tr("Bulb"));
-        info += genInfo.arg(tr("Type")).arg(physical.bulbType());
-        info += genInfo.arg(tr("Luminous Flux")).arg(lm.arg(physical.bulbLumens()));
-        info += genInfo.arg(tr("Colour Temperature")).arg(K.arg(physical.bulbColourTemperature()));
-
-        // Lens
-        QString angle1("%1&deg;");
-        QString angle2("%1&deg; &ndash; %2&deg;");
-
-        info += subTitle.arg(tr("Lens"));
-        info += genInfo.arg(tr("Name")).arg(physical.lensName());
-
-        if (physical.lensDegreesMin() == physical.lensDegreesMax())
-        {
-            info += genInfo.arg(tr("Beam Angle"))
-                .arg(angle1.arg(physical.lensDegreesMin()));
-        }
-        else
-        {
-            info += genInfo.arg(tr("Beam Angle"))
-                .arg(angle2.arg(physical.lensDegreesMin())
-                .arg(physical.lensDegreesMax()));
-        }
-
-        // Focus
-        QString frange("%1&deg;");
-        info += subTitle.arg(tr("Head(s)"));
-        info += genInfo.arg(tr("Type")).arg(physical.focusType());
-        info += genInfo.arg(tr("Pan Range")).arg(frange.arg(physical.focusPanMax()));
-        info += genInfo.arg(tr("Tilt Range")).arg(frange.arg(physical.focusTiltMax()));
-        if (physical.layoutSize() != QSize(1, 1))
-        {
-            info += genInfo.arg(tr("Layout"))
-                           .arg(QString("%1 x %2").arg(physical.layoutSize().width()).arg(physical.layoutSize().height()));
-        }
-    }
-
-    // HTML document & table closure
-    info += "</TABLE>";
-
-    if (fixtureDef != NULL)
-    {
-        info += "<HR>";
-        info += "<DIV CLASS='author' ALIGN='right'>";
-        info += tr("Fixture definition author: ") + fixtureDef->author();
-        info += "</DIV>";
-    }
-
-    return info;
-}
-
 QString FixtureManager::channelsGroupInfoStyleSheetHeader() const
 {
     QString info;
@@ -1673,6 +1544,18 @@ void FixtureManager::initActions()
     connect(m_propertiesAction, SIGNAL(triggered(bool)),
             this, SLOT(slotProperties()));
 
+    m_newDefAction = new QAction(QIcon(":/qlcplus-fixtureeditor.png"),
+                                 tr("New fixture definition..."), this);
+    m_newDefAction->setToolTip(tr("Create a new fixture definition in the embedded editor"));
+    connect(m_newDefAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotNewFixtureDefinition()));
+
+    m_editDefAction = new QAction(QIcon(":/edit.png"),
+                                  tr("Edit fixture definition..."), this);
+    m_editDefAction->setToolTip(tr("Edit the selected fixture's definition in the embedded editor"));
+    connect(m_editDefAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotEditFixtureDefinition()));
+
     m_fadeConfigAction = new QAction(QIcon(":/fade.png"),
                                      tr("Channels Fade Configuration..."), this);
     connect(m_fadeConfigAction, SIGNAL(triggered(bool)),
@@ -1744,6 +1627,12 @@ void FixtureManager::initActions()
                                    tr("Renumber..."), this);
     connect(m_renumberAction, SIGNAL(triggered(bool)),
             this, SLOT(slotPatchRenumber()));
+
+    m_repackAction = new QAction(QIcon(":/configure.png"),
+                                 tr("Repack universe..."), this);
+    m_repackAction->setToolTip(tr("Compact all the fixtures of the current universe"));
+    connect(m_repackAction, SIGNAL(triggered(bool)),
+            this, SLOT(slotPatchRepack()));
 }
 
 void FixtureManager::updateGroupMenu()
@@ -1782,6 +1671,8 @@ void FixtureManager::initToolBar()
     toolbar->addAction(m_addRGBAction);
     toolbar->addAction(m_removeAction);
     toolbar->addAction(m_propertiesAction);
+    toolbar->addAction(m_newDefAction);
+    toolbar->addAction(m_editDefAction);
     toolbar->addAction(m_fadeConfigAction);
     toolbar->addSeparator();
     toolbar->addAction(m_groupAction);
@@ -1794,6 +1685,7 @@ void FixtureManager::initToolBar()
     toolbar->addAction(m_exportAction);
     toolbar->addAction(m_remapAction);
     toolbar->addAction(m_renumberAction);
+    toolbar->addAction(m_repackAction);
 
     QToolButton* btn = qobject_cast<QToolButton*> (toolbar->widgetForAction(m_groupAction));
     Q_ASSERT(btn != NULL);
@@ -2310,6 +2202,53 @@ void FixtureManager::slotProperties()
         editFixtureProperties();
 }
 
+void FixtureManager::slotNewFixtureDefinition()
+{
+    FixtureEditorDialog* dialog = new FixtureEditorDialog(this, m_doc,
+                                                          new QLCFixtureDef());
+    dialog->show();
+}
+
+void FixtureManager::slotEditFixtureDefinition()
+{
+    QList <quint32> ids = selectedFixtures();
+    if (ids.count() != 1)
+        return;
+
+    Fixture* fxi = m_doc->fixture(ids.first());
+    if (fxi == NULL || fxi->fixtureDef() == NULL)
+        return;
+
+    QLCFixtureDef* def = fxi->fixtureDef();
+
+    /* If this definition is already being edited, just raise that editor */
+    FixtureEditorDialog* open = FixtureEditorDialog::find(def->manufacturer(),
+                                                          def->model());
+    if (open != NULL)
+    {
+        open->raise();
+        open->activateWindow();
+        return;
+    }
+
+    /* Edit a copy of the definition, so that the cache instance used by the
+       patched fixtures is never modified directly */
+    QLCFixtureDef* copy = new QLCFixtureDef(def);
+
+    /* Only user definitions already stored in a file are saved back to that
+       file. System definitions are saved to the user directory instead. */
+    QString fileName;
+    if (def->isUser() == true && def->definitionSourceFile().isEmpty() == false)
+    {
+        QFileInfo info(def->definitionSourceFile());
+        if (info.exists() == true)
+            fileName = info.absoluteFilePath();
+    }
+
+    FixtureEditorDialog* dialog = new FixtureEditorDialog(this, m_doc, copy, fileName);
+    dialog->show();
+}
+
 void FixtureManager::slotFadeConfig()
 {
     ChannelsSelection cfg(m_doc, this, ChannelsSelection::ConfigurationMode);
@@ -2588,6 +2527,9 @@ void FixtureManager::slotContextMenuRequested(const QPoint&)
     menu.addAction(m_addRGBAction);
     menu.addAction(m_propertiesAction);
     menu.addAction(m_removeAction);
+    menu.addSeparator();
+    menu.addAction(m_newDefAction);
+    menu.addAction(m_editDefAction);
     menu.addSeparator();
     menu.addAction(m_groupAction);
     menu.addAction(m_unGroupAction);
