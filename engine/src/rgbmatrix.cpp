@@ -328,7 +328,7 @@ int RGBMatrix::algorithmStepsCount()
     return 0;
 }
 
-void RGBMatrix::previewMap(int step, RGBMatrixStep *handler)
+void RGBMatrix::previewMap(int step, double phase, RGBMatrixStep *handler)
 {
     QMutexLocker algorithmLocker(&m_algorithmMutex);
     if (m_algorithm == NULL || handler == NULL)
@@ -340,8 +340,22 @@ void RGBMatrix::previewMap(int step, RGBMatrixStep *handler)
     if (m_group != NULL)
     {
         setMapColors(m_algorithm);
+        // Feed the continuous phase to the algorithm, exactly like write() does.
+        // Fork Lua scripts receive 'step' as a float phase, so without this the
+        // preview would stay frozen on a single frame.
+        m_algorithm->setStepFloat(phase);
         m_algorithm->rgbMap(m_group->size(), handler->stepColor().rgb(), step, handler->m_map);
     }
+}
+
+RGBMap RGBMatrix::currentMap()
+{
+    QMutexLocker algorithmLocker(&m_algorithmMutex);
+
+    if (m_stepHandler == NULL)
+        return RGBMap();
+
+    return m_stepHandler->m_map;
 }
 
 /****************************************************************************

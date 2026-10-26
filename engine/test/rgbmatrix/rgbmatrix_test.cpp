@@ -152,7 +152,7 @@ void RGBMatrix_Test::previewMaps()
     int steps = mtx.stepsCount();
     QCOMPARE(steps, 0);
 
-    mtx.previewMap(0, &handler);
+    mtx.previewMap(0, 0.0, &handler);
     QCOMPARE(handler.m_map.size(), 0); // No fixture group
 
     mtx.setFixtureGroup(0);
@@ -164,12 +164,12 @@ void RGBMatrix_Test::previewMaps()
     mtx.setTotalDuration(8000);
     QCOMPARE(mtx.totalDuration(), uint(8000));
 
-    mtx.previewMap(0, &handler);
+    mtx.previewMap(0, 0.0, &handler);
     QCOMPARE(handler.m_map.size(), 5);
 
     for (int z = 0; z < steps; z++)
     {
-        mtx.previewMap(z, &handler);
+        mtx.previewMap(z, 0.0, &handler);
         for (int y = 0; y < 5; y++)
         {
             for (int x = 0; x < 5; x++)
@@ -181,6 +181,37 @@ void RGBMatrix_Test::previewMaps()
             }
         }
     }
+}
+
+void RGBMatrix_Test::previewMapPhase()
+{
+    RGBLua* script = m_doc->rgbScriptsCache()->script("Varredura Lua");
+    QVERIFY(script != NULL);
+    QVERIFY(script->apiVersion() > 0);
+    QVERIFY(script->name().isEmpty() == false);
+
+    RGBMatrix mtx(m_doc);
+    mtx.setFixtureGroup(0);
+    mtx.setAlgorithm(script);
+    QCOMPARE(mtx.algorithm()->name(), QString("Varredura Lua"));
+
+    RGBMatrixStep handler;
+    QVERIFY(mtx.currentMap().isEmpty()); // Nothing rendered yet
+
+    // The continuous phase must reach the algorithm, exactly like during playback
+    mtx.previewMap(0, 0.0, &handler);
+    RGBMap phaseZero = handler.m_map;
+    QCOMPARE(phaseZero.size(), 5);
+
+    mtx.previewMap(0, 0.5, &handler);
+    QVERIFY(handler.m_map != phaseZero);
+
+    mtx.previewMap(0, 0.0, &handler);
+    QVERIFY(handler.m_map == phaseZero);
+
+    // currentMap() exposes the frame held by the playback step handler
+    mtx.m_stepHandler->m_map = phaseZero;
+    QVERIFY(mtx.currentMap() == phaseZero);
 }
 
 void RGBMatrix_Test::property()

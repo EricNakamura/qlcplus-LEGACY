@@ -78,6 +78,7 @@ properties = {
 Verified in `engine/src/rgbmatrix.cpp` and `engine/src/rgblua.cpp`:
 
 - `RGBMatrix::write()` calls `setStepFloat(m_continuousPhase)` with a wrapped `[0, 1)` phase each 50 Hz tick, then calls `rgbMap(..., currentStepIndex(), ...)`.
+- `RGBMatrix::previewMap(step, phase, handler)` does the same for the editor preview, and `RGBMatrix::currentMap()` exposes the frame being played back.
 - `RGBLua::rgbMap()` **ignores the integer step index** and pushes `m_stepFloat` (the phase) as the Lua `step` argument: `lua_pushnumber(m_luaState, m_stepFloat)`.
 
 So inside Lua, `step` is a **float in `[0, 1)`**, never an integer. Do not compare it with `==` against an index. Compute a phase from it:
@@ -88,13 +89,13 @@ local global_phase = (step / resolution) * (math.pi * 2)
 
 `rgbMapStepCount()` still returns an integer and defines the cycle length used by the editor.
 
-### Editor preview limitation
+### Editor preview
 
-The editor preview path (`RGBMatrix::previewMap()` → `RGBAlgorithm::rgbMap()`) does **not** call `setStepFloat()`. Only playback (`RGBMatrix::write()`) does. As a result, a continuous-phase script renders **statically** in the editor preview (frozen at the last phase, usually `0.0`) but animates correctly during playback. Do not treat a static preview as a broken script.
+The editor preview is phase-driven too: `RGBMatrixEditor::slotPreviewTimeout()` advances the phase with the real elapsed wall time and calls `RGBMatrix::previewMap(step, phase, handler)`, which forwards `phase` to `RGBAlgorithm::setStepFloat()` before rendering. A continuous-phase script therefore animates in the preview at the same speed as playback, regardless of GUI timer jitter. While the editor's **Test** button is active, the preview mirrors the frame actually rendered by the engine via `RGBMatrix::currentMap()`.
 
 ### Reference scripts
 
-- `resources/rgbscripts/sine.lua` — continuous-phase sine wave (`list` + `range` properties).
+- `resources/rgbscripts/sine.lua` — continuous-phase sine wave (`list` + `range` properties); normalizes each frame to 0..1 so the wave always reaches full off/full on despite discrete LED sampling.
 - `resources/rgbscripts/test_script.lua` — continuous-phase sweep with a fading tail.
 
 For the full human-facing guide, see [`docs/RGB-SCRIPTS-LUA.md`](../../../docs/RGB-SCRIPTS-LUA.md).
@@ -114,7 +115,8 @@ For the full human-facing guide, see [`docs/RGB-SCRIPTS-LUA.md`](../../../docs/R
 | Script missing from the editor | Not added to `SCRIPT_FILES` in `resources/rgbscripts/CMakeLists.txt`, or the `name = "..."` line is malformed. |
 | "não possui a função global rgbMap()" warning | `rgbMap` is not a global function (e.g. declared `local`). |
 | Script loads but renders black | Wrong table indexing (0-based) or `rgb` unpacked incorrectly. |
-| Script animates in playback but is static in the editor preview | Expected: the preview does not call `setStepFloat()` (see above). |
+| Wave never reaches full off/full on | Discrete sampling misses the sine peaks: normalize each frame to 0..1 like `sine.lua` does. |
+| Script is static in both preview and playback | The effect duration is 0, or `rgbMap()` ignores `step` (fixed output). |
 | Script never animates at all | `step` is being treated as an integer index instead of a float phase. |
 | Properties ignored | Property `name` missing, or the script reads a different global than the declared `name`. |
 | `apiVersion` 0 / script rejected | `apiVersion` not declared or not a number. |

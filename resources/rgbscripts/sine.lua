@@ -46,31 +46,63 @@ function rgbMap(width, height, rgb, step)
     local g_base = math.floor((rgb % 65536) / 256)
     local b_base = rgb % 256
 
-    -- 2. A Mágica Contínua: 
+    -- 2. A Mágica Contínua:
     -- Como o 'step' avança quebrado a 50fps, a fase corre perfeitamente.
     local global_phase = (step / resolution) * (math.pi * 2)
 
+    -- 3. Primeira passada: calcula a intensidade de cada LED e descobre
+    --    o mínimo e o máximo REAIS deste quadro. A amostragem da onda é
+    --    discreta, então os picos do seno quase nunca caem exatamente
+    --    sobre um LED e a onda ficaria "lavada" (sem 0 nem 1).
+    local raw = {}
+    local min_i, max_i = 1.0, 0.0
+
     for y = 1, height do
-        map[y] = {}
+        raw[y] = {}
         for x = 1, width do
             local local_phase = 0
-            
-            -- 3. Distribuição espacial da onda
+
+            -- 4. Distribuição espacial da onda
             if orientation == "Horizontal" then
                 local_phase = (x / width) * (math.pi * 2)
             else
                 local_phase = (y / height) * (math.pi * 2)
             end
 
-            -- 4. O cálculo do Seno (-1 a 1 normalizado para 0 a 1)
+            -- 5. O cálculo do Seno (-1 a 1 normalizado para 0 a 1)
             local intensity = (math.sin(global_phase + local_phase) + 1) / 2
+            raw[y][x] = intensity
 
-            -- 5. Multiplica a intensidade pela cor escolhida
-            local p_r = math.floor(r_base * intensity)
-            local p_g = math.floor(g_base * intensity)
-            local p_b = math.floor(b_base * intensity)
+            if intensity < min_i then min_i = intensity end
+            if intensity > max_i then max_i = intensity end
+        end
+    end
 
-            -- 6. Remonta o valor bitwise para o C++
+    -- 6. Estica o quadro para a faixa completa 0..1, garantindo que a onda
+    --    realmente apague (0) e alcance o brilho total (1) em todo quadro
+    local span = max_i - min_i
+    local offset = 0.0
+    local scale = 1.0
+
+    if span > 0.0001 then
+        offset = min_i
+        scale = 1.0 / span
+    end
+
+    for y = 1, height do
+        map[y] = {}
+        for x = 1, width do
+            local intensity = (raw[y][x] - offset) * scale
+
+            if intensity < 0.0 then intensity = 0.0 end
+            if intensity > 1.0 then intensity = 1.0 end
+
+            -- 7. Multiplica a intensidade pela cor escolhida
+            local p_r = math.floor(r_base * intensity + 0.5)
+            local p_g = math.floor(g_base * intensity + 0.5)
+            local p_b = math.floor(b_base * intensity + 0.5)
+
+            -- 8. Remonta o valor bitwise para o C++
             map[y][x] = (p_r * 65536) + (p_g * 256) + p_b
         end
     end

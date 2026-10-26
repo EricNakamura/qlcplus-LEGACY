@@ -20,6 +20,8 @@
 #ifndef RGBMATRIXEDITOR_H
 #define RGBMATRIXEDITOR_H
 
+#include <QElapsedTimer>
+
 #include "functioneditor.h"
 
 class Doc;
@@ -176,6 +178,9 @@ private slots:
 private:
     void initPreviewData();
 
+    /** Copy the map of the current preview step into the QML preview data */
+    void updatePreviewData();
+
 signals:
     void previewSizeChanged();
     void previewDataChanged(QVariantList matrixData);
@@ -183,7 +188,10 @@ signals:
 private:
     /** A timer to perform a timed preview of the RGBMatrix pattern */
     QTimer* m_previewTimer;
+    QElapsedTimer m_previewClock;
     uint m_previewElapsed;
+    /** Continuous phase (0.0 - 1.0) fed to the preview, mirrors RGBMatrix::write() */
+    double m_previewPhase;
     RGBMatrixStep *m_previewStepHandler;
     bool m_gotBeat;
     QMutex m_previewMutex;

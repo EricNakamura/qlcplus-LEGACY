@@ -156,6 +156,9 @@ if(qmlui)
         scriptrunner.cpp scriptrunner.h
         scriptv4.cpp scriptv4.h
     )
+
+    # scriptrunner.cpp uses QtQml: the link was lost in the LuaJIT migration
+    target_link_libraries(${module_name} PUBLIC Qt${QT_MAJOR_VERSION}::Qml)
 else()
     target_sources(${module_name} PRIVATE script.cpp script.h)
     

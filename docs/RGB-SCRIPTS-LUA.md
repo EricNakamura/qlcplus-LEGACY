@@ -255,14 +255,15 @@ O `rgbMapStepCount()` continua devolvendo um inteiro, e define o tamanho do
 ciclo mostrado no editor. O multiplicador de velocidade e a duração do efeito
 (no editor) controlam a rapidez da fase — não o "tempo por passo".
 
-### Limitação conhecida: o preview do editor
+### O preview do editor
 
-O caminho de preview do editor (`RGBMatrix::previewMap()`) **não** chama
-`setStepFloat()`. Só a execução real (`RGBMatrix::write()`) chama. Por isso
-um script de fase contínua aparece **parado (estático)** no preview do editor,
-mas **anima corretamente** quando o efeito roda.
+O preview também é guiado por fase: o editor avança a fase com o tempo real
+decorrido e chama `RGBMatrix::previewMap(step, phase, handler)`, que entrega a
+fase ao motor antes de renderizar. Por isso o efeito anima no editor **na
+mesma velocidade** da execução real, mesmo que o timer da interface atrase.
 
-**Isso não é bug do seu script.** Valide a animação executando o efeito.
+Com o botão **Test** ligado, o preview passa a espelhar o frame que a engine
+está realmente renderizando (`RGBMatrix::currentMap()`).
 
 ---
 
@@ -354,7 +355,8 @@ end
 | O efeito não aparece no editor | Não foi adicionado a `SCRIPT_FILES` no `CMakeLists.txt`, ou a linha `name = "..."` está malformada. |
 | Aviso `não possui a função global rgbMap()` | `rgbMap` não é global (ex.: foi declarada como `local`, ou com erro de sintaxe antes). |
 | O script carrega mas pinta tudo preto | Indexação errada (0-based) ou desempacotamento de `rgb` incorreto. |
-| Anima na execução mas fica parado no preview | Esperado: o preview não chama `setStepFloat()` (veja a [seção 6](#6-fase-contínua-o-pulo-do-gato)). |
+| A onda não apaga nem clareia totalmente | Amostragem discreta do seno: normalize cada quadro para 0..1 (veja a [seção 11](#11-exemplo-completo-comentado)). |
+| Fica parado no preview e na execução | A duração do efeito é 0, ou `rgbMap()` não usa `step` (saída fixa). |
 | Nunca anima em lugar nenhum | `step` está sendo tratado como índice inteiro em vez de fase float. |
 | As propriedades são ignoradas | Falta o `name` no descritor, ou o script lê um global diferente do `name` declarado. |
 | `apiVersion` 0 / script rejeitado | `apiVersion` ausente ou não numérico. |
@@ -369,7 +371,7 @@ Os dois scripts de referência ficam em `resources/rgbscripts/`:
   `list` + `range`. **Use este como referência principal.**
 - **`test_script.lua`** — varredura contínua com cauda de brilho decrescente.
 
-Trecho central de `sine.lua`:
+Trecho central de `sine.lua` (com a normalização 0..1 explicada abaixo):
 
 ```lua
 function rgbMap(width, height, rgb, step)
@@ -382,8 +384,11 @@ function rgbMap(width, height, rgb, step)
     -- A fase global avança continuamente com o tempo
     local global_phase = (step / resolution) * (math.pi * 2)
 
+    -- 1ª passada: intensidade de cada LED + mínimo/máximo reais do quadro
+    local raw = {}
+    local min_i, max_i = 1.0, 0.0
     for y = 1, height do
-        map[y] = {}
+        raw[y] = {}
         for x = 1, width do
             local local_phase
             if orientation == "Horizontal" then
@@ -393,10 +398,31 @@ function rgbMap(width, height, rgb, step)
             end
 
             local intensity = (math.sin(global_phase + local_phase) + 1) / 2
+            raw[y][x] = intensity
+            if intensity < min_i then min_i = intensity end
+            if intensity > max_i then max_i = intensity end
+        end
+    end
 
-            local p_r = math.floor(r_base * intensity)
-            local p_g = math.floor(g_base * intensity)
-            local p_b = math.floor(b_base * intensity)
+    -- Estica o quadro para a faixa completa 0..1
+    local span = max_i - min_i
+    local offset, scale = 0.0, 1.0
+    if span > 0.0001 then
+        offset = min_i
+        scale = 1.0 / span
+    end
+
+    -- 2ª passada: aplica a cor escolhida
+    for y = 1, height do
+        map[y] = {}
+        for x = 1, width do
+            local intensity = (raw[y][x] - offset) * scale
+            if intensity < 0.0 then intensity = 0.0 end
+            if intensity > 1.0 then intensity = 1.0 end
+
+            local p_r = math.floor(r_base * intensity + 0.5)
+            local p_g = math.floor(g_base * intensity + 0.5)
+            local p_b = math.floor(b_base * intensity + 0.5)
 
             map[y][x] = (p_r * 65536) + (p_g * 256) + p_b
         end
@@ -405,6 +431,13 @@ function rgbMap(width, height, rgb, step)
     return map
 end
 ```
+
+> **Por que normalizar?** Os LEDs amostram o seno em pontos discretos, e os picos
+> do seno quase nunca caem exatamente sobre um LED. Sem a normalização a onda
+> fica "lavada": numa matriz 5×5, por exemplo, os valores variam de ~6 a ~254 e
+> nunca chegam a 0 (apagado) nem a 1 (brilho total). Normalizar cada quadro para
+> a faixa 0..1 garante contraste total em qualquer tamanho de matriz e em
+> qualquer orientação.
 
 ---
 

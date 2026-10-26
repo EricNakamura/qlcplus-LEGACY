@@ -21,6 +21,7 @@
 #define RGBMATRIXEDITOR_H
 
 #include <QWidget>
+#include <QElapsedTimer>
 #include <QHash>
 
 #include "ui_rgbmatrixeditor.h"
@@ -142,7 +143,11 @@ private:
 
     QGraphicsScene* m_scene;
     QTimer* m_previewTimer;
-    uint m_previewIterator;
+    QElapsedTimer m_previewClock;
+    /** Elapsed wall time (ms) within the current step, drives step changes */
+    double m_previewIterator;
+    /** Continuous phase (0.0 - 1.0) fed to the preview, mirrors RGBMatrix::write() */
+    double m_previewPhase;
 
     QHash<QLCPoint, RGBItem*> m_previewHash;
 };

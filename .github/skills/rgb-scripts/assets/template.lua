@@ -38,8 +38,8 @@ end
 -- rgbMap: return a 2D table map[y][x] of packed RGB integers.
 -- 'step' is a FLOAT phase in [0, 1) (set via setStepFloat), NOT an
 -- integer index. Never compare it with '==' against a step number.
--- Note: the editor preview does not call setStepFloat, so this effect
--- looks static in the preview but animates during playback.
+-- The editor preview feeds the same phase, so the effect animates
+-- in the editor exactly like it does during playback.
 -- ==========================================================
 function rgbMap(width, height, rgb, step)
     local map = {}

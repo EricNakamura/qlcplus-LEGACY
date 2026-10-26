@@ -37,11 +37,14 @@ RGBMatrixEditor::RGBMatrixEditor(QQuickView *view, Doc *doc, QObject *parent)
     , m_group(nullptr)
     , m_previewTimer(new QTimer(this))
     , m_previewElapsed(0)
+    , m_previewPhase(0.0)
     , m_previewStepHandler(new RGBMatrixStep())
 {
     m_view->rootContext()->setContextProperty("rgbMatrixEditor", this);
 
     m_gotBeat = false;
+    // Precise timer: the preview must run at the same 50 Hz as the MasterTimer
+    m_previewTimer->setTimerType(Qt::PreciseTimer);
     connect(m_previewTimer, SIGNAL(timeout()), this, SLOT(slotPreviewTimeout()));
     connect(m_doc->masterTimer(), SIGNAL(beat()), this, SLOT(slotBeatReceived()));
 }
@@ -722,7 +725,7 @@ void RGBMatrixEditor::saveToSequence()
 
         for (int i = 0; i < totalSteps; i++)
         {
-            m_matrix->previewMap(currentStep, m_previewStepHandler);
+            m_matrix->previewMap(currentStep, 0.0, m_previewStepHandler);
             ChaserStep step;
             step.fid = grpScene->id();
             step.hold = m_matrix->duration() - m_matrix->fadeInSpeed();
@@ -844,67 +847,88 @@ QVariantList RGBMatrixEditor::previewData() const
 void RGBMatrixEditor::slotPreviewTimeout()
 {
     if (m_matrix == nullptr || m_group == nullptr || m_matrix->duration() <= 0)
+    {
+        // No playback with a 0 duration: keep the clock fresh so the preview
+        // does not jump when a valid duration is set again
+        m_previewClock.restart();
         return;
+    }
+
+    if (m_previewClock.isValid() == false)
+        m_previewClock.start();
+
+    // Use the real elapsed time instead of assuming the timer fired exactly
+    // after MasterTimer::tick() ms. The GUI thread can be busy and QTimer can
+    // fire late: with a fixed delta the preview would run slower than the
+    // actual playback, which is driven by the MasterTimer thread.
+    double elapsedMs = 0.0;
 
     if (m_matrix->tempoType() == Function::Time)
     {
-        m_previewElapsed += MasterTimer::tick();
+        // NOTE: QElapsedTimer::restart() returns milliseconds, not nanoseconds
+        elapsedMs = double(m_previewClock.restart());
     }
-    else if (m_matrix->tempoType() == Function::Beats && m_gotBeat)
+    else if (m_matrix->tempoType() == Function::Beats && m_gotBeat == true)
     {
         m_gotBeat = false;
-        m_previewElapsed += 1000;
+        elapsedMs = 1000.0;
+        m_previewClock.restart();
     }
 
-    if (m_previewElapsed >= m_matrix->duration())
-    {
-        QMutexLocker locker(&m_previewMutex);
+    // In Beats mode without a beat there is nothing to advance
+    if (elapsedMs <= 0.0)
+        return;
 
+    uint stepMs = m_matrix->duration();
+    if (stepMs < MasterTimer::tick())
+        stepMs = MasterTimer::tick();
+
+    // Advance the discrete step index on wall time, like RGBMatrix::roundCheck() does
+    m_previewElapsed += uint(elapsedMs);
+    while (m_previewElapsed >= stepMs)
+    {
         m_previewStepHandler->checkNextStep(m_matrix->runOrder(), m_matrix->getColor(0),
                                             m_matrix->getColor(1), m_matrix->stepsCount());
-
-        m_matrix->previewMap(m_previewStepHandler->currentStepIndex(), m_previewStepHandler);
-
-        //qDebug() << "Step changing. Index:" << m_previewStepHandler->currentStepIndex() << ", map size:" << map.size();
-
-        m_previewElapsed = 0;
-/*
-        for (int y = 0; y < map.size(); y++)
-        {
-            for (int x = 0; x < map[y].size(); x++)
-            {
-                QLCPoint pt(x, y);
-                if (m_group->head(pt).isValid())
-                {
-                    if (shape->color() != QColor(map[y][x]).rgb())
-                        shape->setColor(map[y][x]);
-
-                    if (shape->color() == QColor(Qt::black).rgb())
-                        shape->draw(m_matrix->fadeOutSpeed());
-                    else
-                        shape->draw(m_matrix->fadeInSpeed());
-                }
-            }
-        }
-*/
-        if (m_previewData.isEmpty() || m_previewStepHandler->m_map.isEmpty())
-            return;
-
-        QMapIterator<QLCPoint, GroupHead> it(m_group->headsMap());
-        while (it.hasNext())
-        {
-            it.next();
-
-            QLCPoint pt(it.key());
-            //GroupHead head(it.value());
-            int ptIdx = pt.x() + (pt.y() * m_group->size().width());
-            if (ptIdx < m_previewData.size())
-                m_previewData[ptIdx] = QVariant(QColor(m_previewStepHandler->m_map[pt.y()][pt.x()]));
-        }
-
-        //qDebug() << "Preview data changed!";
-        emit previewDataChanged(m_previewData);
+        m_previewElapsed -= stepMs;
     }
+
+    // Advance the continuous phase exactly like RGBMatrix::write() does
+    m_previewPhase += (elapsedMs / double(m_matrix->duration())) * m_matrix->speedMultiplier();
+    while (m_previewPhase >= 1.0)
+        m_previewPhase -= 1.0;
+    while (m_previewPhase < 0.0)
+        m_previewPhase += 1.0;
+
+    QMutexLocker locker(&m_previewMutex);
+
+    m_matrix->previewMap(m_previewStepHandler->currentStepIndex(), m_previewPhase, m_previewStepHandler);
+
+    updatePreviewData();
+}
+
+void RGBMatrixEditor::updatePreviewData()
+{
+    if (m_previewData.isEmpty() || m_previewStepHandler->m_map.isEmpty())
+        return;
+
+    QMapIterator<QLCPoint, GroupHead> it(m_group->headsMap());
+    while (it.hasNext())
+    {
+        it.next();
+
+        QLCPoint pt(it.key());
+        //GroupHead head(it.value());
+        if (pt.y() >= m_previewStepHandler->m_map.size() ||
+            pt.x() >= m_previewStepHandler->m_map[pt.y()].size())
+            continue;
+
+        int ptIdx = pt.x() + (pt.y() * m_group->size().width());
+        if (ptIdx < m_previewData.size())
+            m_previewData[ptIdx] = QVariant(QColor(m_previewStepHandler->m_map[pt.y()][pt.x()]));
+    }
+
+    //qDebug() << "Preview data changed!";
+    emit previewDataChanged(m_previewData);
 }
 
 void RGBMatrixEditor::slotBeatReceived()
@@ -916,6 +940,7 @@ void RGBMatrixEditor::initPreviewData()
 {
     m_previewTimer->stop();
     m_previewElapsed = 0;
+    m_previewPhase = 0.0;
     m_previewData.clear();
     QSize pSize = previewSize();
 
@@ -928,6 +953,12 @@ void RGBMatrixEditor::initPreviewData()
     m_previewStepHandler->initializeDirection(m_matrix->direction(), m_matrix->getColor(0),
                                               m_matrix->getColor(1), m_matrix->stepsCount(), m_matrix->algorithm());
     m_previewStepHandler->calculateColorDelta(m_matrix->getColor(0), m_matrix->getColor(1), m_matrix->algorithm());
+
+    // Render the first frame right away, from the same phase a real playback starts from.
+    // No mutex needed here: the timer is stopped and callers may already hold m_previewMutex.
+    m_previewClock.restart();
+    m_matrix->previewMap(m_previewStepHandler->currentStepIndex(), m_previewPhase, m_previewStepHandler);
+    updatePreviewData();
 
     m_previewTimer->start(MasterTimer::tick());
 }

@@ -200,8 +200,15 @@ public:
     /** Get the number of steps of the current algorithm */
     int stepsCount() const;
 
-    /** Get the preview of the current algorithm at the given step */
-    void previewMap(int step, RGBMatrixStep *handler);
+    /** Get the preview of the current algorithm at the given step.
+     *  $phase is the continuous phase (0.0 - 1.0) fed to script algorithms,
+     *  exactly as RGBMatrix::write() does during playback, so that the editor
+     *  preview matches the running effect. */
+    void previewMap(int step, double phase, RGBMatrixStep *handler);
+
+    /** Get a thread-safe copy of the map currently rendered by playback.
+     *  Used by the editor preview to follow the real effect while testing. */
+    RGBMap currentMap();
 
 private:
     int algorithmStepsCount();
