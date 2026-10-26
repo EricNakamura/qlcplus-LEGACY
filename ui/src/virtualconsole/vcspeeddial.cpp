@@ -141,6 +141,12 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
 
     vBox->addLayout(multFactorDivHBox);
 
+    /* Update timer */
+    m_updateTimer = new QTimer(this);
+    connect(m_updateTimer, SIGNAL(timeout()),
+            this, SLOT(slotUpdate()));
+    m_updateTimer->setSingleShot(true);
+
     // Update labels
     slotMultDivChanged();
 
@@ -159,12 +165,6 @@ VCSpeedDial::VCSpeedDial(QWidget* parent, Doc* doc)
 
     // Don't show Infinite button: it's handled by presets
     setVisibilityMask(SpeedDial::defaultVisibilityMask() & ~SpeedDial::Infinite);
-
-    /* Update timer */
-    m_updateTimer = new QTimer(this);
-    connect(m_updateTimer, SIGNAL(timeout()),
-            this, SLOT(slotUpdate()));
-    m_updateTimer->setSingleShot(true);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     // Background color has been moved to Base
@@ -390,7 +390,10 @@ void VCSpeedDial::slotUpdate()
         VCSpeedDialPreset* preset = it.value();
 
         QPushButton* button = reinterpret_cast<QPushButton*>(widget);
-        button->setDown(preset->m_value == currentValue);
+        if (preset->m_factor != 0)
+            button->setDown(preset->m_factor == m_currentFactor);
+        else
+            button->setDown(preset->m_value == currentValue);
     }
     updateFeedback();
 }
@@ -473,6 +476,11 @@ void VCSpeedDial::slotPresetClicked()
         {
             m_dial->toggleInfinite();
         }
+        else if (preset->m_factor != 0) // Relative preset
+        {
+            m_currentFactor = preset->m_factor;
+            slotMultDivChanged();
+        }
         else // Normal case
         {
             m_dial->setValue(preset->m_value, true);
@@ -536,18 +544,15 @@ void VCSpeedDial::slotMultDivReset()
 void VCSpeedDial::slotMultDivChanged()
 {
     if (m_currentFactor > 0)
-    {
         m_factoredValue = m_dial->value() * m_currentFactor;
-        m_multDivLabel->setText(QString("%1x").arg(m_currentFactor));
-    }
     else
-    {
         m_factoredValue = m_dial->value() / qAbs(m_currentFactor);
-        m_multDivLabel->setText(QString("1/%1x").arg(qAbs(m_currentFactor)));
-    }
+
+    m_multDivLabel->setText(VCSpeedDialPreset::factorToString(m_currentFactor));
     m_multDivResultLabel->setText("(" + Function::speedToString(m_factoredValue) + ")");
 
     slotFactoredValueChanged();
+    m_updateTimer->start(UPDATE_TIMEOUT);
 }
 
 void VCSpeedDial::slotFactoredValueChanged()

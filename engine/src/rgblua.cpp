@@ -206,12 +206,6 @@ int RGBLua::rgbMapStepCount(const QSize& size)
 
     lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, m_rgbMapStepCountRef);
 
-    lua_getglobal(m_luaState, "rgbMapStepCount");
-    if (!lua_isfunction(m_luaState, -1)) {
-        lua_pop(m_luaState, 1);
-        return -1;
-    }
-
     lua_pushinteger(m_luaState, size.width());
     lua_pushinteger(m_luaState, size.height());
 
@@ -237,13 +231,6 @@ void RGBLua::rgbMap(const QSize& size, uint rgb, int step, RGBMap& map)
 
     // Pega a função DIRETO da memória usando o nosso ID de cache
     lua_rawgeti(m_luaState, LUA_REGISTRYINDEX, m_rgbMapRef);
-
-    // Busca a função rgbMap global do script
-    lua_getglobal(m_luaState, "rgbMap");
-    if (!lua_isfunction(m_luaState, -1)) {
-        lua_pop(m_luaState, 1);
-        return;
-    }
 
     // Empilha os argumentos na memória do C para o Lua ler
     lua_pushinteger(m_luaState, size.width());

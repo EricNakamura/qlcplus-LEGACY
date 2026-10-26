@@ -102,6 +102,7 @@ protected slots:
     void slotAddPresetClicked();
     void slotRemovePresetClicked();
     void slotPresetNameEdited(QString const& newName);
+    void slotPresetFactorChanged();
     void slotSpeedDialWidgetValueChanged(int ms);
 
     void slotInputValueChanged(quint32 universe, quint32 channel);

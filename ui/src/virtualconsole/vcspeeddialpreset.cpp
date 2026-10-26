@@ -27,6 +27,7 @@
 VCSpeedDialPreset::VCSpeedDialPreset(quint8 id)
     : m_id(id)
     , m_value(1000)
+    , m_factor(0)
 {
 }
 
@@ -46,6 +47,7 @@ VCSpeedDialPreset &VCSpeedDialPreset::operator=(const VCSpeedDialPreset &preset)
         m_id = preset.m_id;
         m_name = preset.m_name;
         m_value = preset.m_value;
+        m_factor = preset.m_factor;
         m_keySequence = preset.m_keySequence;
 
         if (preset.m_inputSource != NULL)
@@ -70,6 +72,15 @@ bool VCSpeedDialPreset::compare(VCSpeedDialPreset const* left, VCSpeedDialPreset
     return *left < *right;
 }
 
+QString VCSpeedDialPreset::factorToString(int factor)
+{
+    if (factor == 0)
+        return QString();
+    if (factor > 0)
+        return QString("%1x").arg(factor);
+    return QString("1/%1x").arg(qAbs(factor));
+}
+
 bool VCSpeedDialPreset::loadXML(QXmlStreamReader &root)
 {
     if (root.name() != KXMLQLCVCSpeedDialPreset)
@@ -85,6 +96,8 @@ bool VCSpeedDialPreset::loadXML(QXmlStreamReader &root)
     }
 
     m_id = root.attributes().value(KXMLQLCVCSpeedDialPresetID).toString().toUInt();
+
+    m_factor = root.attributes().value(KXMLQLCVCSpeedDialPresetFactor).toString().toInt();
 
     /* Children */
     while (root.readNextStartElement())
@@ -122,6 +135,8 @@ bool VCSpeedDialPreset::saveXML(QXmlStreamWriter *doc)
 
     doc->writeStartElement(KXMLQLCVCSpeedDialPreset);
     doc->writeAttribute(KXMLQLCVCSpeedDialPresetID, QString::number(m_id));
+    if (m_factor != 0)
+        doc->writeAttribute(KXMLQLCVCSpeedDialPresetFactor, QString::number(m_factor));
 
     doc->writeTextElement(KXMLQLCVCSpeedDialPresetName, m_name);
     doc->writeTextElement(KXMLQLCVCSpeedDialPresetValue, QString::number(m_value));

@@ -129,9 +129,36 @@ void RGBScript_Test::evaluateInvalidApiVersion()
     QCOMPARE(s.evaluate(), false);
 }
 
-void RGBScript_Test::rgbMapStepCount() { QVERIFY(true); } // Mock para passar a build
+void RGBScript_Test::rgbMapStepCount()
+{
+    RGBLua s(m_doc);
+    QVERIFY(s.load(INTERNAL_SCRIPTDIR "sine.lua") == true);
+
+    for (int i = 0; i < 100; i++)
+        QVERIFY(s.rgbMapStepCount(QSize(5, 5)) > 0);
+
+    /* Every call must leave the Lua stack balanced */
+    QCOMPARE(lua_gettop(s.m_luaState), 0);
+}
+
 void RGBScript_Test::rgbMapColorArray() { QVERIFY(true); } // Mock para passar a build
-void RGBScript_Test::rgbMap() { QVERIFY(true); } // Mock para passar a build
+
+void RGBScript_Test::rgbMap()
+{
+    RGBLua s(m_doc);
+    QVERIFY(s.load(INTERNAL_SCRIPTDIR "sine.lua") == true);
+
+    RGBMap map;
+    for (int i = 0; i < 1000; i++)
+        s.rgbMap(QSize(5, 5), 0xFFFFFF, 0, map);
+
+    QCOMPARE(map.size(), 5);
+    QCOMPARE(map[0].size(), 5);
+
+    /* Every call must leave the Lua stack balanced */
+    QCOMPARE(lua_gettop(s.m_luaState), 0);
+}
+
 void RGBScript_Test::runScripts() { QVERIFY(true); } // Mock para passar a build
 
 QTEST_MAIN(RGBScript_Test)

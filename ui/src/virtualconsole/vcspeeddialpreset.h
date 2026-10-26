@@ -36,6 +36,7 @@ class QXmlStreamWriter;
 #define KXMLQLCVCSpeedDialPresetID       QStringLiteral("ID")
 #define KXMLQLCVCSpeedDialPresetName     QStringLiteral("Name")
 #define KXMLQLCVCSpeedDialPresetValue    QStringLiteral("Value")
+#define KXMLQLCVCSpeedDialPresetFactor   QStringLiteral("Factor")
 
 class VCSpeedDialPreset final
 {
@@ -50,6 +51,9 @@ public:
     VCSpeedDialPreset& operator=(const VCSpeedDialPreset& preset);
     bool operator<(VCSpeedDialPreset const& right) const;
     static bool compare(VCSpeedDialPreset const* left, VCSpeedDialPreset const* right);
+
+    /** Return a readable representation of a speed factor, e.g. "4x" or "1/2x" */
+    static QString factorToString(int factor);
     /************************************************************************
      * Load & Save
      ***********************************************************************/
@@ -72,6 +76,9 @@ public:
 
     /** The preset value */
     int m_value;
+
+    /** The preset speed factor: 0 = fixed time, > 0 = multiply, < 0 = divide */
+    qint32 m_factor;
 
     QSharedPointer<QLCInputSource> m_inputSource;
     QKeySequence m_keySequence;

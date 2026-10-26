@@ -154,6 +154,16 @@ VCSpeedDialProperties::VCSpeedDialProperties(VCSpeedDial* dial, Doc* doc)
             m_lastAssignedID = preset->m_id;
     }
     m_presetsTree->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    /* Preset value: fixed time or speed factor */
+    m_presetFactorCombo->addItem(tr("Fixed time"), 0);
+    const QList<int> factors = { -16, -8, -4, -2, 1, 2, 4, 8, 16 };
+    foreach (int factor, factors)
+        m_presetFactorCombo->addItem(VCSpeedDialPreset::factorToString(factor), factor);
+
+    connect(m_presetFactorCombo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(slotPresetFactorChanged()));
+
     updateTree();
 
     m_presetInputWidget = new InputSelectionWidget(m_doc, this);
@@ -399,7 +409,8 @@ void VCSpeedDialProperties::updateTree()
         QTreeWidgetItem *item = new QTreeWidgetItem(m_presetsTree);
         item->setData(0, Qt::UserRole, preset->m_id);
         item->setText(0, preset->m_name);
-        item->setText(1, Function::speedToString(preset->m_value));
+        item->setText(1, preset->m_factor != 0 ? VCSpeedDialPreset::factorToString(preset->m_factor)
+                                               : Function::speedToString(preset->m_value));
     }
     m_presetsTree->resizeColumnToContents(0);
     m_presetsTree->blockSignals(false);
@@ -415,7 +426,8 @@ void VCSpeedDialProperties::updateTreeItem(VCSpeedDialPreset const& preset)
         if (treeItem->data(0, Qt::UserRole).toUInt() == preset.m_id)
         {
             treeItem->setText(0, preset.m_name);
-            treeItem->setText(1, Function::speedToString(preset.m_value));
+            treeItem->setText(1, preset.m_factor != 0 ? VCSpeedDialPreset::factorToString(preset.m_factor)
+                                                      : Function::speedToString(preset.m_value));
             m_presetsTree->blockSignals(false);
             return;
         }
@@ -488,6 +500,13 @@ void VCSpeedDialProperties::slotTreeSelectionChanged()
         m_presetInputWidget->setInputSource(preset->m_inputSource);
         m_presetInputWidget->setKeySequence(preset->m_keySequence.toString(QKeySequence::NativeText));
         m_presetNameEdit->setText(preset->m_name);
+
+        m_presetFactorCombo->blockSignals(true);
+        int factorIndex = m_presetFactorCombo->findData(preset->m_factor);
+        m_presetFactorCombo->setCurrentIndex(factorIndex < 0 ? 0 : factorIndex);
+        m_presetFactorCombo->blockSignals(false);
+
+        m_speedDialWidget->setEnabled(preset->m_factor == 0);
         m_speedDialWidget->setValue(preset->m_value);
     }
 }
@@ -502,6 +521,28 @@ void VCSpeedDialProperties::slotPresetNameEdited(QString const& newName)
 
         updateTreeItem(*preset);
     }
+}
+
+void VCSpeedDialProperties::slotPresetFactorChanged()
+{
+    VCSpeedDialPreset* preset = getSelectedPreset();
+
+    if (preset == NULL)
+        return;
+
+    QString oldAutoName = preset->m_factor != 0 ? VCSpeedDialPreset::factorToString(preset->m_factor)
+                                                : Function::speedToString(preset->m_value);
+    preset->m_factor = m_presetFactorCombo->currentData().toInt();
+
+    if (preset->m_name == oldAutoName)
+    {
+        preset->m_name = preset->m_factor != 0 ? VCSpeedDialPreset::factorToString(preset->m_factor)
+                                               : Function::speedToString(preset->m_value);
+        m_presetNameEdit->setText(preset->m_name);
+    }
+
+    m_speedDialWidget->setEnabled(preset->m_factor == 0);
+    updateTreeItem(*preset);
 }
 
 void VCSpeedDialProperties::slotSpeedDialWidgetValueChanged(int ms)

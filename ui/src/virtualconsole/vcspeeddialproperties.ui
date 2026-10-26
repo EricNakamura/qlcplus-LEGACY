@@ -447,6 +447,20 @@
          <item row="3" column="1" colspan="2">
           <widget class="SpeedDial" name="m_speedDialWidget" native="true"/>
          </item>
+         <item row="4" column="1">
+          <widget class="QLabel" name="m_presetValueLabel">
+           <property name="text">
+            <string>Preset Value</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QComboBox" name="m_presetFactorCombo">
+           <property name="toolTip">
+            <string>Fixed time or multiplier of the current time</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0" rowspan="9">
           <widget class="QTreeWidget" name="m_presetsTree">
            <column>
